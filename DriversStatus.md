@@ -37,7 +37,7 @@ This list is up-to-date as of Preview5 of TinyCLR 2.0
 |BuzzerClick|:heavy_check_mark:|:heavy_check_mark:|Working but throws Thread.Abort exceptions. Needs rework.|[:floppy_disk:](Drivers/BuzzerClick)
 |CameraClick|:x:||MikroE Obsoleted the Camera Click. Won't code.|
 |CANSPIClick|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/CANSPIClick)
-|CapSenseClick|:heavy_check_mark:|:x:|TinyCLR 2.0 Preview5 has issues with slave address 0x00.|[:floppy_disk:](Drivers/CapSenseClick)
+|CapSenseClick|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/CapSenseClick)
 |CC3000Click|:x:|||
 |CC3100Click|:x:|||
 |ccRFClick|:x:|||

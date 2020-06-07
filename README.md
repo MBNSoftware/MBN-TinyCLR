@@ -1,17 +1,21 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) 
 
-![MBN logo](https://github.com/MikroBusNet/MikroBusNet-for-TinyCLR-2.0/blob/WIP/logonarrow.jpg)
+![MBN logo](logonarrow.jpg)
 
 # **Available drivers**
 
 The list of all drivers and their status is [here](https://github.com/MikroBusNet/MBN-TinyCLR/blob/master/DriversStatus.md).
+
+# **Please note**
+
+More drivers will be added as soon as they are verified by TinyCLR 2.0. Those are the drivers tagged with the clock symbol :clock130: in the above list.
 
 ## **How to use our drivers**
 
 It's as simple as that :
 
 * Create a TinyCLR application project in Visual Studio
-* Add **_MBNCore.cs_** to your project
+* Add [**_MBNCore.cs_**](https://github.com/MikroBusNet/MBN-TinyCLR/tree/master/MBNCore) to your project
 * Add the needed driver source as well, from the [Drivers folder](https://github.com/MikroBusNet/MBN-TinyCLR/tree/master/Drivers)
 * Use the example in the [Examples folder](https://github.com/MikroBusNet/MBN-TinyCLR/tree/master/Examples) as a start for your program
 * That's all !
@@ -26,6 +30,7 @@ So far, the current boards are supported :
 * MBN Ram (6 sockets)
 * GHI SC20100 dev board (2 sockets)
 * GHI SC20260 dev board (2 sockets)
+* GHI FEZ Stick (2 sockets)
   
 Each socket has a number and is accessible in code using the following syntax :
 

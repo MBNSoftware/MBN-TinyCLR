@@ -556,8 +556,8 @@ namespace MBN
         public static readonly Socket SocketOne = new Socket
         {
             AdcController = RamBoard.AdcChannel.Controller1.Id,
-            AdcChannel = RamBoard.AdcChannel.Controller1.PC3,
-            AnPin = STM32H7.GpioPin.PC3,
+            AdcChannel = RamBoard.AdcChannel.Controller1.PC0,
+            AnPin = STM32H7.GpioPin.PC0,
             Rst = STM32H7.GpioPin.PJ3,
             Cs = STM32H7.GpioPin.PJ4,
             SpiBus = RamBoard.SpiBus.Spi2,
@@ -571,9 +571,9 @@ namespace MBN
             ComPort = RamBoard.UartPort.Usart6,
             Rx = STM32H7.GpioPin.PC7,
             Tx = STM32H7.GpioPin.PC6,
-            I2cBus = RamBoard.I2cBus.I2c3,
-            Scl = STM32H7.GpioPin.PH7,
-            Sda = STM32H7.GpioPin.PH8,
+            I2cBus = RamBoard.I2cBus.I2c2,
+            Scl = STM32H7.GpioPin.PB10,
+            Sda = STM32H7.GpioPin.PB11,
             Name = "SocketOne"
         };
 
@@ -582,9 +582,9 @@ namespace MBN
         /// </summary>
         public static readonly Socket SocketTwo = new Socket
         {
-            AdcController = RamBoard.AdcChannel.Controller3.Id,
-            AdcChannel = RamBoard.AdcChannel.Controller3.PF8,
-            AnPin = STM32H7.GpioPin.PF8,
+            AdcController = RamBoard.AdcChannel.Controller1.Id,
+            AdcChannel = RamBoard.AdcChannel.Controller1.PC3,
+            AnPin = STM32H7.GpioPin.PC3,
             Rst = STM32H7.GpioPin.PJ6,
             Cs = STM32H7.GpioPin.PH15,
             SpiBus = RamBoard.SpiBus.Spi2,
@@ -598,9 +598,9 @@ namespace MBN
             ComPort = RamBoard.UartPort.Usart2,
             Rx = STM32H7.GpioPin.PD6,
             Tx = STM32H7.GpioPin.PD5,
-            I2cBus = RamBoard.I2cBus.I2c3,
-            Scl = STM32H7.GpioPin.PH7,
-            Sda = STM32H7.GpioPin.PH8,
+            I2cBus = RamBoard.I2cBus.I2c2,
+            Scl = STM32H7.GpioPin.PB10,
+            Sda = STM32H7.GpioPin.PB11,
             Name = "SocketTwo"
         };
 
@@ -622,12 +622,12 @@ namespace MBN
             PwmChannel = RamBoard.PwmChannel.Controller3.PB1,
             PwmPin = STM32H7.GpioPin.PB1,
             Int = STM32H7.GpioPin.PK2,
-            ComPort = RamBoard.UartPort.Uart7,
-            Rx = STM32H7.GpioPin.PF6,
-            Tx = STM32H7.GpioPin.PF7,
-            I2cBus = RamBoard.I2cBus.I2c3,
-            Scl = STM32H7.GpioPin.PH7,
-            Sda = STM32H7.GpioPin.PH8,
+            ComPort = RamBoard.UartPort.Uart8,
+            Rx = STM32H7.GpioPin.PJ9,
+            Tx = STM32H7.GpioPin.PJ8,
+            I2cBus = RamBoard.I2cBus.I2c2,
+            Scl = STM32H7.GpioPin.PB10,
+            Sda = STM32H7.GpioPin.PB11,
             Name = "SocketThree"
         };
 
@@ -637,10 +637,10 @@ namespace MBN
         public static readonly Socket SocketFour = new Socket
         {
             AdcController = RamBoard.AdcChannel.Controller3.Id,
-            AdcChannel = RamBoard.AdcChannel.Controller3.PF9,
-            AnPin = STM32H7.GpioPin.PF9,
-            Rst = STM32H7.GpioPin.PH4,
-            Cs = STM32H7.GpioPin.PJ15,
+            AdcChannel = RamBoard.AdcChannel.Controller3.PF8,
+            AnPin = STM32H7.GpioPin.PF8,
+            Rst = STM32H7.GpioPin.PI12,
+            Cs = STM32H7.GpioPin.PA6,
             SpiBus = RamBoard.SpiBus.Spi3,
             Sck = STM32H7.GpioPin.PB3,
             Miso = STM32H7.GpioPin.PB4,
@@ -649,12 +649,12 @@ namespace MBN
             PwmChannel = RamBoard.PwmChannel.Controller3.PB0,
             PwmPin = STM32H7.GpioPin.PB0,
             Int = STM32H7.GpioPin.PK7,
-            ComPort = RamBoard.UartPort.Uart8,
-            Rx = STM32H7.GpioPin.PJ9,
-            Tx = STM32H7.GpioPin.PJ8,
-            I2cBus = RamBoard.I2cBus.I2c2,
-            Scl = STM32H7.GpioPin.PB10,
-            Sda = STM32H7.GpioPin.PB11,
+            ComPort = RamBoard.UartPort.Uart7,
+            Rx = STM32H7.GpioPin.PF6,
+            Tx = STM32H7.GpioPin.PF7,
+            I2cBus = RamBoard.I2cBus.I2c3,
+            Scl = STM32H7.GpioPin.PH7,
+            Sda = STM32H7.GpioPin.PH8,
             Name = "SocketFour"
         };
 
@@ -663,9 +663,9 @@ namespace MBN
         /// </summary>
         public static readonly Socket SocketFive = new Socket
         {
-            AdcController = RamBoard.AdcChannel.Controller1.Id,
-            AdcChannel = RamBoard.AdcChannel.Controller1.PC0,
-            AnPin = STM32H7.GpioPin.PC0,
+            AdcController = RamBoard.AdcChannel.Controller3.Id,
+            AdcChannel = RamBoard.AdcChannel.Controller3.PF9,
+            AnPin = STM32H7.GpioPin.PF9,
             Rst = STM32H7.GpioPin.PE4,
             Cs = STM32H7.GpioPin.PI4,
             SpiBus = RamBoard.SpiBus.Spi3,
@@ -679,9 +679,9 @@ namespace MBN
             ComPort = RamBoard.UartPort.Usart1,
             Rx = STM32H7.GpioPin.PA10,
             Tx = STM32H7.GpioPin.PA9,
-            I2cBus = RamBoard.I2cBus.I2c2,
-            Scl = STM32H7.GpioPin.PB10,
-            Sda = STM32H7.GpioPin.PB11,
+            I2cBus = RamBoard.I2cBus.I2c3,
+            Scl = STM32H7.GpioPin.PH7,
+            Sda = STM32H7.GpioPin.PH8,
             Name = "SocketFive"
         };
 
@@ -706,9 +706,9 @@ namespace MBN
             ComPort = RamBoard.UartPort.Uart5,
             Rx = STM32H7.GpioPin.PB12,
             Tx = STM32H7.GpioPin.PB13,
-            I2cBus = RamBoard.I2cBus.I2c2,
-            Scl = STM32H7.GpioPin.PB10,
-            Sda = STM32H7.GpioPin.PB11,
+            I2cBus = RamBoard.I2cBus.I2c3,
+            Scl = STM32H7.GpioPin.PH7,
+            Sda = STM32H7.GpioPin.PH8,
             Name = "SocketSix"
         };
         #endregion
@@ -831,25 +831,25 @@ namespace MBN
         /// </summary>
         public static readonly Socket FEZStick_1 = new Socket
         {
-            AdcController = "GHIElectronics.TinyCLR.NativeApis.STM32H7.AdcController\\2",
-            AdcChannel = STM32H7.GpioPin.PF9,
-            AnPin = STM32H7.GpioPin.PF9,
-            Rst = STM32H7.GpioPin.PG9,
-            Cs = STM32H7.GpioPin.PH10,
-            Int = STM32H7.GpioPin.PG10,
+            AdcController = "GHIElectronics.TinyCLR.NativeApis.STM32H7.AdcController\\1",
+            AdcChannel = STM32H7.AdcChannel.Channel10,
+            AnPin = STM32H7.GpioPin.PC0,
+            Rst = STM32H7.GpioPin.PD4,
+            Cs = STM32H7.GpioPin.PD3,
+            Int = STM32H7.GpioPin.PC5,
+            I2cBus = STM32H7.I2cBus.I2c1,
+            Scl = STM32H7.GpioPin.PB8,
+            Sda = STM32H7.GpioPin.PB9,
+            SpiBus = STM32H7.SpiBus.Spi4,
+            Sck = STM32H7.GpioPin.PE12,
+            Miso = STM32H7.GpioPin.PE13,
+            Mosi = STM32H7.GpioPin.PE14,
+            PwmController = "GHIElectronics.TinyCLR.NativeApis.STM32H7.PwmController\\15",
+            PwmChannel = STM32H7.PwmChannel.Channel0,
+            PwmPin = STM32H7.GpioPin.PE5,
+            ComPort = STM32H7.UartPort.Usart1,
             Rx = STM32H7.GpioPin.PA10,
             Tx = STM32H7.GpioPin.PA9,
-            Scl = STM32H7.GpioPin.PB10,
-            Sda = STM32H7.GpioPin.PB11,
-            Sck = STM32H7.GpioPin.PI1,
-            Miso = STM32H7.GpioPin.PI2,
-            Mosi = STM32H7.GpioPin.PI3,
-            SpiBus = STM32H7.SpiBus.Spi2,
-            I2cBus = STM32H7.I2cBus.I2c2,
-            PwmController = "GHIElectronics.TinyCLR.NativeApis.STM32H7.PwmController\\11",
-            PwmChannel = STM32H7.GpioPin.PH9,
-            PwmPin = STM32H7.GpioPin.PH9,
-            ComPort = STM32H7.UartPort.Usart1,
             Name = "FEZStick_1"
         };
 
@@ -858,25 +858,25 @@ namespace MBN
         /// </summary>
         public static readonly Socket FEZStick_2 = new Socket
         {
-            AdcController = "GHIElectronics.TinyCLR.NativeApis.STM32H7.AdcController\\2",
-            AdcChannel = STM32H7.GpioPin.PF8,
-            AnPin = STM32H7.GpioPin.PF8,
-            Rst = STM32H7.GpioPin.PE4,
-            Cs = STM32H7.GpioPin.PI4,
-            Int = STM32H7.GpioPin.PE6,
-            Rx = STM32H7.GpioPin.PB12,
-            Tx = STM32H7.GpioPin.PB13,
+            AdcController = "GHIElectronics.TinyCLR.NativeApis.STM32H7.AdcController\\0",
+            AdcChannel = STM32H7.AdcChannel.Channel0,
+            AnPin = STM32H7.GpioPin.PC1,
+            Rst = STM32H7.GpioPin.PD15,
+            Cs = STM32H7.GpioPin.PD14,
+            Int = STM32H7.GpioPin.PA8,
+            I2cBus = STM32H7.I2cBus.I2c2,
             Scl = STM32H7.GpioPin.PB10,
             Sda = STM32H7.GpioPin.PB11,
-            Sck = STM32H7.GpioPin.PI1,
-            Miso = STM32H7.GpioPin.PI2,
-            Mosi = STM32H7.GpioPin.PI3,
-            SpiBus = STM32H7.SpiBus.Spi2,
-            I2cBus = STM32H7.I2cBus.I2c2,
-            PwmController = "GHIElectronics.TinyCLR.NativeApis.STM32H7.PwmController\\4",
-            PwmChannel = STM32H7.GpioPin.PH12,
-            PwmPin = STM32H7.GpioPin.PH12,
+            SpiBus = STM32H7.SpiBus.Spi3,
+            Sck = STM32H7.GpioPin.PB3,
+            Miso = STM32H7.GpioPin.PB4,
+            Mosi = STM32H7.GpioPin.PB5,
+            PwmController = "GHIElectronics.TinyCLR.NativeApis.STM32H7.PwmController\\2",
+            PwmChannel = STM32H7.PwmChannel.Channel3,
+            PwmPin = STM32H7.GpioPin.PA3,
             ComPort = STM32H7.UartPort.Uart5,
+            Rx = STM32H7.GpioPin.PB12,
+            Tx = STM32H7.GpioPin.PB13,
             Name = "FEZStick_2"
         };
         #endregion
