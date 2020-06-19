@@ -216,7 +216,7 @@ namespace MBN.Modules
                 var tab = str.Split(',');
                 SignalOrigin = ResolveSignalOrigin(str.Substring(1, 2));
                 FixMode = Byte.Parse(tab[2]);
-                Auto2D3D = tab[1][0];
+                Auto2D3D = String.IsNullOrEmpty(tab[1]) ? Char.MinValue : tab[1][0];
                 Checksum = (Byte)Convert.ToInt32(str.Right(2), 16);
                 PDOP = (Single)Double.Parse(tab[15]);
                 HDOP = (Single)Double.Parse(tab[16]);
@@ -327,11 +327,11 @@ namespace MBN.Modules
                 FixTime = tab[1] != String.Empty
                     ? new TimeSpan(Convert.ToInt32(tab[1].Substring(0, 2)), Convert.ToInt32(tab[1].Substring(2, 2)), Convert.ToInt32(tab[1].Substring(4, 2)))
                     : new TimeSpan(0);
-                ValidFrame = tab[2][0] == 'A';
+                ValidFrame = String.IsNullOrEmpty(tab[2]) ? false : tab[2][0] == 'A';
                 Latitude = (Single)Double.Parse(tab[3]) / 100;
-                LatitudeHemisphere = tab[4] == String.Empty ? Char.MinValue : tab[4][0];
+                LatitudeHemisphere = String.IsNullOrEmpty(tab[4]) ? Char.MinValue : tab[4][0];
                 Longitude = (Single)Double.Parse(tab[5]) / 100;
-                LongitudePosition = tab[6] == String.Empty ? Char.MinValue : tab[6][0];
+                LongitudePosition = String.IsNullOrEmpty(tab[6]) ? Char.MinValue : tab[6][0];
                 SpeedKnots = (Single)Double.Parse(tab[7]);
                 SpeedKm = SpeedKnots * 1.852f;
                 TrackAngle = (Single)Double.Parse(tab[8]);
@@ -623,12 +623,12 @@ namespace MBN.Modules
                     : new TimeSpan(0);
                 FixQuality = Byte.Parse(tab[6]);
                 SatellitesTracked = Byte.Parse(tab[7]);
-                AltitudeUnit = tab[10][0];
-                GeoideHeightUnit = tab[12][0];
+                AltitudeUnit = String.IsNullOrEmpty(tab[10]) ? Char.MinValue : tab[10][0];
+                GeoideHeightUnit = String.IsNullOrEmpty(tab[12]) ? Char.MinValue : tab[12][0];
                 Latitude = (Single)Double.Parse(tab[2]) / 100;
-                LatitudeHemisphere = tab[3] == String.Empty ? Char.MinValue : tab[3][0];
+                LatitudeHemisphere = String.IsNullOrEmpty(tab[3]) ? Char.MinValue : tab[3][0];
                 Longitude = (Single)Double.Parse(tab[4]) / 100;
-                LongitudePosition = tab[5] == String.Empty ? Char.MinValue : tab[5][0];
+                LongitudePosition = String.IsNullOrEmpty(tab[5]) ? Char.MinValue : tab[5][0];
                 HorizontalDilution = (Single)Double.Parse(tab[8]);
                 Altitude = (Single)Double.Parse(tab[9]);
                 GeoideHeight = (Single)Double.Parse(tab[11]);

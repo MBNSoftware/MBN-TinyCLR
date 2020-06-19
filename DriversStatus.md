@@ -1,6 +1,6 @@
 # **Drivers status**
 
-This list is up-to-date as of Preview5 of TinyCLR 2.0
+This list is up-to-date as of Preview6 of TinyCLR 2.0
 
 * **Status**
   * :heavy_check_mark: : driver is working as expected.
@@ -19,21 +19,24 @@ This list is up-to-date as of Preview5 of TinyCLR 2.0
 |ADC3Click|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/Adc3%20Click)
 |ADCClick|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/AdcClick)
 |AlphaNumRClick|:x:|||
-|Altitude2Click|:heavy_check_mark:|:clock130:||
-|Altitude3Click|:heavy_check_mark:|:clock130:||
+|Altitude2Click|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/Altitude2Click)
+|Altitude3Click|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/Altitude3Click)
 |AltitudeClick|:heavy_check_mark:|:clock130:||
-|Ambient2Click|:heavy_check_mark:|:clock130:||
+|Ambient2Click|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/Ambient2Click)
 |AmbientClick|:heavy_check_mark:|:clock130:||
 |BarGraph|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/BargraphClick)
 |BarGraph2|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/Bargraph2Click)
-|BarometerClick|:heavy_check_mark:|:clock130:||
+|BarometerClick|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/BarometerClick)
 |BiHallClick|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/BiHallClick)
 |BLE2Click|:x:|||
 |Bluetooth2Click|:x:|||
 |BluetoothClick|:x:|||
 |BME280|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/BME280)
-|BMP180|:heavy_check_mark:|:clock130:||
-|ButtonRClick|:heavy_check_mark:|:clock130:||
+|BMP085|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/BMP085)
+|BMP180|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/BMP180)
+|BMP183|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/BMP183)
+|BMP280|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/BMP280)
+|ButtonRClick|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/ButtonRClick)
 |BuzzerClick|:heavy_check_mark:|:heavy_check_mark:|Working but throws Thread.Abort exceptions. Needs rework.|[:floppy_disk:](Drivers/BuzzerClick)
 |CameraClick|:x:||MikroE Obsoleted the Camera Click. Won't code.|
 |CANSPIClick|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/CANSPIClick)
@@ -52,7 +55,7 @@ This list is up-to-date as of Preview5 of TinyCLR 2.0
 |DS18B20Click|:heavy_check_mark:|:clock130:||
 |EEpromClick|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/EEpromClick)
 |eInkClick|:x:|||
-|EnvironmentClick|:heavy_check_mark:|:clock130:||
+|EnvironmentClick|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/EnvironmentClick)
 |ETHClick|:x:|||
 |ETHWizClick|:x:|||
 |EVEClick|:heavy_check_mark:|:clock130:||
@@ -64,6 +67,8 @@ This list is up-to-date as of Preview5 of TinyCLR 2.0
 |FRAMClick|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/FRAMClick)
 |FTDIClick|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/FTDIClick)
 |GNSSClick|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/GNSSClick)
+|GNSS4Click|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/Gnss4Click)
+|GnssZoeClick|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/GnssZoeClick)
 |GPS2Click|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/GPS2Click)
 |GPS3Click|:heavy_check_mark:|:clock130:||
 |GPS3ClickFull|:heavy_check_mark:|:clock130:||
@@ -77,7 +82,7 @@ This list is up-to-date as of Preview5 of TinyCLR 2.0
 |HT16K33|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/HT16K33)
 |HTU21D|:heavy_check_mark:|:clock130:||
 |I2CMuxClick|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/I2CMuxClick)
-|IlluminanceClick|:heavy_check_mark:|:clock130:||
+|IlluminanceClick|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/IlluminanceClick)
 |IRClick|:heavy_check_mark:|:clock130:||
 |IrDA2Click|:x:|||
 |IRGestureClick|:x:|:construction:||
@@ -121,6 +126,7 @@ This list is up-to-date as of Preview5 of TinyCLR 2.0
 |RS232Click|:x:|||
 |RS485Click|:x:|||
 |RTC2Click|:heavy_check_mark:|:clock130:||
+|RTC3Click|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/RTC3)
 |RTC4Click|:x:|:construction:||
 |RTC5Click|:x:|||
 |RTCClick|:heavy_check_mark:|:clock130:||
@@ -131,17 +137,17 @@ This list is up-to-date as of Preview5 of TinyCLR 2.0
 |SpeakUpClick|:heavy_check_mark:|:x:|Does not seem to recognize orders|[:floppy_disk:](Drivers/SpeakUpClick)
 |SRAMClick|:x:|||
 |StepperClick|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/StepperClick)
-|TempHum10Click|:heavy_check_mark:|:clock130:||
+|TempHum10Click|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/TempHum10Click)
 |TempHum11Click|:heavy_check_mark:|:clock130:||
 |TempHum12Click|:heavy_check_mark:|:clock130:||
-|TempHum2Click|:heavy_check_mark:|:clock130:||
-|TempHum4Click|:heavy_check_mark:|:clock130:||
+|TempHum2Click|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/TempHum2Click)
+|TempHum4Click|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/TempHum4Click)
 |TempHum5Click|:x:|||
-|TempHum6Click|:heavy_check_mark:|:clock130:||
-|TempHum7Click|:heavy_check_mark:|:clock130:||
-|TempHum8Click|:heavy_check_mark:|:clock130:||
-|TempHum9Click|:heavy_check_mark:|:clock130:||
-|TempHumClick|:heavy_check_mark:|:clock130:||
+|TempHum6Click|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/TempHum6Click)
+|TempHum7Click|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/TempHum7Click)
+|TempHum8Click|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/TempHum8Click)
+|TempHum9Click|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/TempHum9Click)
+|TempHumClick|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/TempHumClick)
 |Thermo13Click|:heavy_check_mark:|:clock130:||
 |Thermo2Click|:x:|||
 |Thermo3Click|:heavy_check_mark:|:clock130:||
