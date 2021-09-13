@@ -673,7 +673,7 @@ namespace MBN.Modules
 
         private static Single CalculatePressureAsl(Single uncompensatedPressure)
         {
-            Single seaLevelCompensation = (Single) (101325F * Math.Pow((288F - 0.0065F * 143F) / 288F, 5.256F));
+            Single seaLevelCompensation = (Single) (101325F * Math.Pow((288D - 0.0065F * 143F) / 288F, 5.256F));
             return 101325F + (uncompensatedPressure - seaLevelCompensation);
         }
 
@@ -928,7 +928,7 @@ namespace MBN.Modules
         {
             if (TemperatureSamplingRate == SamplingRate.Skipped || PressureSamplingRate == SamplingRate.Skipped) return Single.MinValue;
             Single pressure = ReadPressure();
-            return (Single) (44330.77F * (1.0F - Math.Pow(pressure * 100F / CalculatePressureAsl(pressure * 100F), 0.190263F)));
+            return (Single) (44330.77F * (1.0F - Math.Pow(pressure * 100D / CalculatePressureAsl(pressure * 100F), 0.190263F)));
         }
 
         /// <summary>

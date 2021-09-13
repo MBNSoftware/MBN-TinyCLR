@@ -222,7 +222,7 @@ namespace MBN.Modules
             resultInt32 = 0;
             for (Byte i = 0; i < count; ++i)
             {
-                resultInt32 += (Int32)((bytes[i + startIndex] - 48) * Math.Pow(10, count - i - 1));
+                resultInt32 += (Int32)((bytes[i + startIndex] - 48) * Math.Pow(10.0, count - i - 1));
             }
 
             return resultInt32;
@@ -237,7 +237,7 @@ namespace MBN.Modules
             {
                 if (bytes[i + startIndex] != 46)
                 {
-                    resultInt64 += (Int64)((bytes[i + startIndex] - 48) * Math.Pow(10, count - pow - 1));
+                    resultInt64 += (Int64)((bytes[i + startIndex] - 48) * Math.Pow(10.0, count - pow - 1));
                     pow++;
                 }
                 else
@@ -246,7 +246,7 @@ namespace MBN.Modules
                 }
             }
 
-            return resultInt64 / Math.Pow(10, count - dec);
+            return resultInt64 / Math.Pow(10.0, count - dec);
         }
 
         private static void GetChecksum(Byte[] sentence, ref Byte checksum, ref DataStatus dataStatus)

@@ -439,7 +439,7 @@ namespace MBN.Modules
 
         private static Single CalculatePressureAsl(Single uncompensatedPressure)
         {
-            Single seaLevelCompensation = (Single) (101325 * Math.Pow((288 - 0.0065F * 143F) / 288F, 5.256F));
+            Single seaLevelCompensation = (Single) (101325 * Math.Pow((288 - 0.0065D * 143F) / 288F, 5.256F));
             return 101325 + uncompensatedPressure - seaLevelCompensation;
         }
 

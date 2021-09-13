@@ -623,7 +623,7 @@ namespace MBN.Modules
             Int32 exponent = dataSum >> 12;
             Int32 mantissa = dataSum & 0xFFF;
 
-            return (Int32) (0.01 * Math.Pow(2, exponent) * mantissa);
+            return (Int32) (0.01 * Math.Pow(2.0, exponent) * mantissa);
         }
 
         private Byte[] LuxToBytes(Double lux)
