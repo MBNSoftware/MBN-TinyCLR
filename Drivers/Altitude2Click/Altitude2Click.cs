@@ -387,19 +387,19 @@ namespace MBN.Modules
         /// End While
         /// </code>
         /// </example>
-        public void ReadSensor(out Single temperature, out Single pressure, out Single altitude)
+        public void ReadSensor(out float temperature, out float pressure, out float altitude)
         {
-            Single D2 = ReadADC(MS5607_CMD_ADC_D2, PressureOverSamplingRate);
-            Single D1 = ReadADC(MS5607_CMD_ADC_D1, TemperatureOverSamplingRate);
+            float D2 = ReadADC(MS5607_CMD_ADC_D2, PressureOverSamplingRate);
+            float D1 = ReadADC(MS5607_CMD_ADC_D1, TemperatureOverSamplingRate);
 
             // Calcualte 1st order pressure and temperature compensation
-            Single dT = (Single) (D2 - CalibrationData[5] * Math.Pow(2, 8));
-            Single OFF = (Single) (CalibrationData[2] * Math.Pow(2, 17) + dT * CalibrationData[4] / Math.Pow(2, 6));
-            Single SENS = (Single) (CalibrationData[1] * Math.Pow(2, 16) + dT * CalibrationData[3] / Math.Pow(2, 7));
+            float dT = (float) (D2 - CalibrationData[5] * Math.Pow(2.0, 8));
+            float OFF = (float) (CalibrationData[2] * Math.Pow(2.0, 17) + dT * CalibrationData[4] / Math.Pow(2.0, 6));
+            float SENS = (float) (CalibrationData[1] * Math.Pow(2.0, 16) + dT * CalibrationData[3] / Math.Pow(2.0, 7));
 
-            temperature = (Single) (2000 + dT * CalibrationData[6] / Math.Pow(2, 23)) / 100;
-            pressure = (Single) ((D1 * SENS / Math.Pow(2, 21) - OFF) / Math.Pow(2, 15));
-            altitude = (Single) (44330.77 * (1.0 - Math.Pow(pressure / CalculatePressureAsl(pressure), 0.1902663538687809)));
+            temperature = (float) (2000 + dT * CalibrationData[6] / Math.Pow(2.0, 23)) / 100;
+            pressure = (float) ((D1 * SENS / Math.Pow(2.0, 21) - OFF) / Math.Pow(2.0, 15));
+            altitude = (float) (44330.77 * (1.0 - Math.Pow(pressure / CalculatePressureAsl(pressure), 0.1902663538687809)));
 
             if (PressureCompensationMode == PressureCompensationModes.SeaLevelCompensated)
             {
@@ -413,8 +413,8 @@ namespace MBN.Modules
             }
 
             // Calculate 2nd order pressure and temperature compensation
-            Single T2 = (Single) (dT * dT / Math.Pow(2, 31));
-            Single OFF2 = (Single) (61 * (temperature - 2000) * (temperature - 2000) / Math.Pow(2, 4));
+            Single T2 = (Single) (dT * dT / Math.Pow(2.0, 31));
+            Single OFF2 = (Single) (61 * (temperature - 2000) * (temperature - 2000) / Math.Pow(2.0, 4));
             Single SENS2 = 2 * (temperature - 2000) * (temperature - 2000);
 
             if (temperature < -1500)
@@ -429,7 +429,7 @@ namespace MBN.Modules
             temperature -= T2;
             temperature = ScaleTemperature(temperature);
 
-            pressure = (Single) ((D1 * SENS / Math.Pow(2, 21) - OFF) / Math.Pow(2, 15));
+            pressure = (Single) ((D1 * SENS / Math.Pow(2.0, 21) - OFF) / Math.Pow(2.0, 15));
 
             if (PressureCompensationMode == PressureCompensationModes.SeaLevelCompensated)
             {

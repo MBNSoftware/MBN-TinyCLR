@@ -30,7 +30,7 @@ namespace MBN.Modules
 
         public delegate void FaultEventHandler(RTDClick sender, byte DataByte);
         public event FaultEventHandler FaultEvent;
-        public delegate void DataReadyEventHandler(RTDClick sender, float Data);
+        public delegate void DataReadyEventHandler(RTDClick sender, double Data);
         public event DataReadyEventHandler DataReadyFahrenheitEvent;
         public event DataReadyEventHandler DataReadyCelsiusEvent;
 
@@ -314,7 +314,7 @@ namespace MBN.Modules
             return ((adcValue * ReferenceReistor) / x); //MAX31865 has a 15bit resolution
         }
 
-        public float GetTemperatureCelsius()
+        public double GetTemperatureCelsius()
         {
             const float RTD_ALPHA = 3.9083e-3F;
             const float RTD_BETA = -5.775e-7F;
@@ -322,12 +322,12 @@ namespace MBN.Modules
             const float bSq = RTD_ALPHA * RTD_ALPHA;
 
             float c = 1.0F - GetResistance() / (int)Sensor; //100 for PT100, 1000 for PT1000
-            float d = bSq - 2.0F * a2 * c;
+            double d = bSq - 2.0F * a2 * c;
             return (-RTD_ALPHA + Math.Sqrt(d)) / a2;
         }
 
         //Alternative way...
-        //public float GetTemperatureCelsius()
+        //public double GetTemperatureCelsius()
         //{
         //    const float RTD_A = 3.9083e-3F;
         //    const float RTD_B = -5.775e-7F;
@@ -366,7 +366,7 @@ namespace MBN.Modules
         //    return temp;
         //}
 
-        public float GetTemperatureFahrenheit()
+        public double GetTemperatureFahrenheit()
         {
             //Convert C to F
             return (GetTemperatureCelsius() * (9 / 5)) + 32;
