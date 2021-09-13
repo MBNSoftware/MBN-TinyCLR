@@ -74,7 +74,7 @@ jobs:
         working-directory: main
 
       # https://github.com/actions/upload-artifact
-      - name: Upload Artifact
+      - name: Upload nuget Artifacts
         uses: actions/upload-artifact@v2
         with:
           name: click-drivers
@@ -85,7 +85,12 @@ jobs:
           # ${{ github.workspace }}\**\*.pe
 
       # # # Publish
-      - name: Push nuget to Github
+      - name: Publish nuget to Github
         run: |
           nuget sources Add -Name github -Source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json -UserName ${{ github.repository_owner }} -Password ${{ secrets.NUGET_PUBLISH }}
           nuget push "**/${{ env.nugetPackageName }}*.nupkg" -Source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json -SkipDuplicate -ApiKey ${{ secrets.NUGET_PUBLISH }}
+
+      - name: Publish nuget to nuget.org
+        #if: startsWith(github.ref, 'refs/heads/release')
+        run: |
+          nuget push "**/${{ env.nugetPackageName }}*.nupkg" -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_ORG_API_KEY}} -SkipDuplicate
