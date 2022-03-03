@@ -12,7 +12,7 @@
  */
 
 #if (NANOFRAMEWORK_1_0)
-using nanoFramework.Devices.OneWire;
+using nanoFramework.Device.OneWire;
 #else
 using GHIElectronics.TinyCLR.Devices.Onewire;
 #endif
@@ -282,7 +282,7 @@ namespace MBN.Modules
         public DS18B20(Int32 oneWirePin)
         {
 #if (NANOFRAMEWORK_1_0)
-            _oneWire = new OneWireController(); //TODO: is this on the right pin?
+            _oneWire = new OneWireHost(); //TODO: is this on the right pin?
 #else
             _oneWire = new OneWireController(oneWirePin);
 #endif
@@ -308,11 +308,15 @@ namespace MBN.Modules
         #region Fields
 
         private static ArrayList _deviceList;
+#if (NANOFRAMEWORK_1_0)
+        private static OneWireHost _oneWire;
+#else
         private static OneWireController _oneWire;
+#endif
 
-        #endregion
+#endregion
 
-        #region ENUMS
+#region ENUMS
 
         internal enum RomCommands
         {
@@ -356,9 +360,9 @@ namespace MBN.Modules
             Resolution12Bit = 0x7F
         }
 
-        #endregion
+#endregion
 
-        #region Public Properties
+#region Public Properties
 
         /// <summary>
         ///     Returns an ArrayList of the unique 64-Bit Addresses of all DS18B20 sensors on the OneWire Bus.
@@ -375,7 +379,11 @@ namespace MBN.Modules
         /// <summary>
         ///     Exposes the native NETMF OneWire interface object of the OneWire Bus.
         /// </summary>
+#if (NANOFRAMEWORK_1_0)
+        public OneWireHost Interface => _oneWire;
+#else
         public OneWireController Interface => _oneWire;
+#endif
 
         /// <summary>
         ///     Gets the number of DS18B20 devices on the OneWire Bus.
@@ -412,11 +420,11 @@ namespace MBN.Modules
         /// </example>
         public TemperatureUnits TemperatureUnit = TemperatureUnits.Celsius;
 
-        #endregion
+#endregion
 
-        #region Pubic Methods
+#region Pubic Methods
 
-        #region Device Related Methods
+#region Device Related Methods
 
         /// <summary>
         /// Returns an ArrayList of all DS18B20 sensors on the OneWire Bus.
@@ -491,9 +499,9 @@ namespace MBN.Modules
             return false;
         }
 
-        #endregion
+#endregion
 
-        #region Device Resolution Methods
+#region Device Resolution Methods
 
         /// <summary>
         ///     Returns the current resolution of the device, 9-12 Bit.

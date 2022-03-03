@@ -12,7 +12,7 @@
  */
 
 #if (NANOFRAMEWORK_1_0)
-using nanoFramework.Devices.OneWire;
+using nanoFramework.Device.OneWire;
 #else
 using GHIElectronics.TinyCLR.Devices.OneWire;
 #endif
@@ -102,7 +102,7 @@ namespace MBN.Modules
         public Thermo2Click(Hardware.Socket socket, GpioSelect gpio = GpioSelect.GP0)
         {
 #if (NANOFRAMEWORK_1_0)
-            Interface = new OneWireController();
+            Interface = new OneWireHost();
 #else
             Interface = new OneWireController(gpio == GpioSelect.GP0 ? socket.PwmPin : socket.AnPin);
 #endif
@@ -214,7 +214,11 @@ namespace MBN.Modules
         /// <summary>
         ///     Exposes the native TinyCLR 1-Wire Bus.
         /// </summary>
+#if (NANOFRAMEWORK_1_0)
+        public OneWireHost Interface { get; }
+#else
         public OneWireController Interface { get; }
+#endif
 
         /// <summary>
         ///     Gets the number of Thermo2 Clicks on the OneWire Bus.

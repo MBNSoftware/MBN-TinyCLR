@@ -3,8 +3,18 @@
   <ItemGroup>
     <ProjectCapability Include="TestContainer" />
   </ItemGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|AnyCPU">
+      <Configuration>Debug</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|AnyCPU">
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <NanoFrameworkProjectSystemPath>$(MSBuildToolsPath)..\..\..\nanoFramework\v1.0\</NanoFrameworkProjectSystemPath>
+    <NanoFrameworkProjectSystemPath>$(MSBuildExtensionsPath)\nanoFramework\v1.0\</NanoFrameworkProjectSystemPath>
   </PropertyGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.Default.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.Default.props')" />
   <PropertyGroup>
@@ -31,25 +41,22 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="nano.runsettings" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="mscorlib, Version=1.10.5.4, Culture=neutral, PublicKeyToken=c07d481e9758c731">
-      <HintPath>..\packages\nanoFramework.CoreLibrary.1.10.5\lib\mscorlib.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="mscorlib">
+      <HintPath>..\packages\nanoFramework.CoreLibrary.1.12.0-preview.9\lib\mscorlib.dll</HintPath>
     </Reference>
-    <Reference Include="nanoFramework.TestFramework, Version=1.0.157.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
-      <HintPath>..\packages\nanoFramework.TestFramework.1.0.157\lib\nanoFramework.TestFramework.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="nanoFramework.TestFramework">
+      <HintPath>..\packages\nanoFramework.TestFramework.1.0.178\lib\nanoFramework.TestFramework.dll</HintPath>
     </Reference>
-    <Reference Include="nanoFramework.UnitTestLauncher, Version=0.0.0.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
-      <HintPath>..\packages\nanoFramework.TestFramework.1.0.157\lib\nanoFramework.UnitTestLauncher.exe</HintPath>
-      <Private>True</Private>
+    <Reference Include="nanoFramework.UnitTestLauncher">
+      <HintPath>..\packages\nanoFramework.TestFramework.1.0.178\lib\nanoFramework.UnitTestLauncher.exe</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Drivers\nanoFramework.ClickDrivers.nfproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="nano.runsettings" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.CSharp.targets" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.CSharp.targets')" />
   <ProjectExtensions>
@@ -57,11 +64,11 @@
       <ProjectConfigurationsDeclaredAsItems />
     </ProjectCapabilities>
   </ProjectExtensions>
-  <Import Project="..\packages\nanoFramework.TestFramework.1.0.157\build\nanoFramework.TestFramework.targets" Condition="Exists('..\packages\nanoFramework.TestFramework.1.0.157\build\nanoFramework.TestFramework.targets')" />
+  <Import Project="..\packages\nanoFramework.TestFramework.1.0.178\build\nanoFramework.TestFramework.targets" Condition="Exists('..\packages\nanoFramework.TestFramework.1.0.178\build\nanoFramework.TestFramework.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105.The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\nanoFramework.TestFramework.1.0.157\build\nanoFramework.TestFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\nanoFramework.TestFramework.1.0.157\build\nanoFramework.TestFramework.targets'))" />
+    <Error Condition="!Exists('..\packages\nanoFramework.TestFramework.1.0.178\build\nanoFramework.TestFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\nanoFramework.TestFramework.1.0.178\build\nanoFramework.TestFramework.targets'))" />
   </Target>
 </Project>

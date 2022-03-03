@@ -11,7 +11,7 @@
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 #if (NANOFRAMEWORK_1_0)
-using nanoFramework.Devices.OneWire;
+using nanoFramework.Device.OneWire;
 #else
 using GHIElectronics.TinyCLR.Devices.OneWire;
 #endif
@@ -80,7 +80,7 @@ namespace MBN.Modules
         public UniqueIDClick(Hardware.Socket socket, GpioSelect gpio)
         {
 #if (NANOFRAMEWORK_1_0)
-            _interface = new OneWireController();
+            _interface = new OneWireHost();
 #else
             _interface = new OneWireController(gpio == GpioSelect.GP0 ? socket.PwmPin : socket.AnPin);
 #endif
@@ -96,7 +96,11 @@ namespace MBN.Modules
 #region Fields
 
         private static ArrayList _deviceList;
+#if (NANOFRAMEWORK_1_0)
+        private static OneWireHost _interface;
+#else
         private static OneWireController _interface;
+#endif
 
 #endregion
 
@@ -147,14 +151,18 @@ namespace MBN.Modules
             return crc;
         }
 
-#endregion
+        #endregion
 
-#region Public Properties
+        #region Public Properties
 
         /// <summary>
         ///     Exposes the native TinyCLR 1-Wire Bus.
         /// </summary>
+#if (NANOFRAMEWORK_1_0)
+        public OneWireHost Interface => _interface;
+#else
         public OneWireController Interface => _interface;
+#endif
 
         /// <summary>
         ///     Returns an ArrayList of the unique 64-Bit Addresses of all UniqueID Clicks on the One-Wire Bus.

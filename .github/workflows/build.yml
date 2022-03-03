@@ -18,62 +18,46 @@ jobs:
     runs-on: windows-latest
     env:
       solution: 'nanoFramework.ClickDrivers.sln'
-      buildPlatform: 'Any CPU'
       buildConfiguration: 'Release'
       classLibName: 'nanoFramework.MikroClick.Drivers'
       nugetPackageName: 'nanoFramework.ClickDrivers'
-      #repoName: 'MBN-TinyCLR' #repoName: 'lib-nanoFramework-MikroClick-Drivers'
+      
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          path: main
-      - name: Checkout tools repo
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-          repository: nanoframework/nf-tools
-          path: tools
+
       - name: Install build components for nanoFramework
-        run: ./github-actions/install-nf-build-components.ps1
-        working-directory: tools
+        uses: nanoframework/nanobuild@v1
 
       - name: Setup MSBuild Path
-        uses: microsoft/setup-msbuild@v1.0.2
+        uses: microsoft/setup-msbuild@v1.1
+        with:
+          msbuild-architecture: x64
 
-      # https://github.com/NuGet/setup-nuget
       - name: Install NuGet client
         uses: nuget/setup-nuget@v1
-        with:
-          nuget-version: '5.8.0'
+        #with:
           #nuget-api-key: ${{ secrets.NuGetAPIKey }}
 
       - name: Restore nugets
-        run: nuget restore ${{ env.solution }} -ConfigFile NuGet.Config
-        working-directory: main
-        
+        run: nuget restore ${{ env.solution }} -ConfigFile NuGet.Config        
 
       - name: Build App
         run: msbuild ${{ env.solution }} /p:Configuration=${{ env.buildConfiguration }}
-        working-directory: main
 
       # - name: Run unit tests
       #   run: ./nanoFramework.nanoCLR.exe -load ...nanoFramework.UnitTestLauncher.pe --load ..mscorlib.pe --load ...nanoFramework.TestFramework.pe --load ...NFUnitTest.pe
-      #   working-directory: main
 
       - name: Set nuget package version using nerdbank
         uses: dotnet/nbgv@v0.4.0
         with:
-          path: main
           setAllVars: true
-
 
       - name: Pack nugets #Should use https://github.com/dotnet/Nerdbank.GitVersioning/blob/master/doc/public_vs_stable.md for better management of naming!
         run: nuget pack ${{ env.nugetPackageName }}.nuspec -Version ${{ env.NBGV_NuGetPackageVersion }} -Symbols -SymbolPackageFormat snupkg -properties Configuration=${{ env.buildConfiguration }}
-        working-directory: main
 
-      # https://github.com/actions/upload-artifact
       - name: Upload nuget Artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -86,6 +70,7 @@ jobs:
 
       # # # Publish
       - name: Publish nuget to Github
+        if: startsWith(github.ref, 'refs/heads/develop-nanoframework')
         run: |
           nuget sources Add -Name github -Source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json -UserName ${{ github.repository_owner }} -Password ${{ secrets.NUGET_PUBLISH }}
           nuget push "**/${{ env.nugetPackageName }}*.nupkg" -Source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json -SkipDuplicate -ApiKey ${{ secrets.NUGET_PUBLISH }}

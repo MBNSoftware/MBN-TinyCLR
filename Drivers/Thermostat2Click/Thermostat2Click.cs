@@ -15,7 +15,7 @@
 
 #if (NANOFRAMEWORK_1_0)
 using System.Device.Gpio;
-using nanoFramework.Devices.OneWire;
+using nanoFramework.Device.OneWire;
 #else
 using GHIElectronics.TinyCLR.Devices.Gpio;
 using GHIElectronics.TinyCLR.Devices.Onewire;
@@ -117,7 +117,7 @@ namespace MBN.Modules
         public Thermostat2Click(Hardware.Socket socket)
         {
 #if (NANOFRAMEWORK_1_0)
-            Interface = new OneWireController();
+            Interface = new OneWireHost();
 
             _relayOutput = new GpioController().OpenPin(socket.Cs);
             _relayOutput.SetPinMode(PinMode.Output);
@@ -255,7 +255,11 @@ namespace MBN.Modules
         /// _ow.Dispose();
         /// </code>
         /// </example>
+#if (NANOFRAMEWORK_1_0)
+        public OneWireHost Interface { get; }
+#else
         public OneWireController Interface { get; }
+#endif
 
         /// <summary>
         ///     Gets the number of DS18B20 devices on the OneWire Bus.
