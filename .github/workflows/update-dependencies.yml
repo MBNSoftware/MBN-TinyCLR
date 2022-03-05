@@ -22,7 +22,7 @@ jobs:
     timeout-minutes: 15
     runs-on: windows-latest
     env:
-      GITHUB_TOKEN: ${{ github.token }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
