@@ -19,10 +19,12 @@ defaults:
     shell: pwsh
 
 jobs:
-  update-nanoframework-preview:
+  update-nanoframework-dependencies:
     name: Update .NET nanoFramework dependencies
     timeout-minutes: 15
     runs-on: windows-latest
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -38,7 +40,7 @@ jobs:
         with:
           nuget-version: '5.x'
       - name: Update dependencies
-        run: ./github-actions/update-nf-dependencies.ps1 prerelease
+        run: ./github-actions/update-nf-dependencies.ps1
         working-directory: tools
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
