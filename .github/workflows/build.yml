@@ -3,7 +3,7 @@
 
 # This workflow will build the solution and release a nuget.
 
-name: Build nanoFramework lib and release nuget #TODO, handle releases!
+name: Build nanoFramework lib and release nuget (if appropriate)
 
 on: [push, pull_request]
 
@@ -18,10 +18,12 @@ jobs:
     runs-on: windows-latest
     env:
       solution: 'nanoFramework.ClickDrivers.sln'
+      buildPlatform: 'Any CPU'
       buildConfiguration: 'Release'
       classLibName: 'nanoFramework.MikroClick.Drivers'
       nugetPackageName: 'nanoFramework.ClickDrivers'
-      
+      GITHUB_TOKEN: ${{ github.token }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -38,11 +40,11 @@ jobs:
 
       - name: Install NuGet client
         uses: nuget/setup-nuget@v1
-        #with:
-          #nuget-api-key: ${{ secrets.NuGetAPIKey }}
+        # with:
+        #   nuget-api-key: ${{ secrets.NUGET_API_KEY }}
 
-      - name: Restore nugets
-        run: nuget restore ${{ env.solution }} -ConfigFile NuGet.Config        
+      - name: Restore nuget packages
+        run: nuget restore ${{ env.solution }} -ConfigFile NuGet.Config
 
       - name: Build App
         run: msbuild ${{ env.solution }} /p:Configuration=${{ env.buildConfiguration }}
@@ -59,7 +61,7 @@ jobs:
         run: nuget pack ${{ env.nugetPackageName }}.nuspec -Version ${{ env.NBGV_NuGetPackageVersion }} -Symbols -SymbolPackageFormat snupkg -properties Configuration=${{ env.buildConfiguration }}
 
       - name: Upload nuget Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: click-drivers
           path: |
@@ -68,7 +70,7 @@ jobs:
           # ${{ github.workspace }}\**\*.dll
           # ${{ github.workspace }}\**\*.pe
 
-      # # # Publish
+      # Publish nuget tasks
       - name: Publish nuget to Github
         if: startsWith(github.ref, 'refs/heads/develop-nanoframework')
         run: |
@@ -76,6 +78,6 @@ jobs:
           nuget push "**/${{ env.nugetPackageName }}*.nupkg" -Source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json -SkipDuplicate -ApiKey ${{ secrets.NUGET_PUBLISH }}
 
       - name: Publish nuget to nuget.org
-        #if: startsWith(github.ref, 'refs/heads/release')
+        if: startsWith(github.ref, 'refs/heads/release')
         run: |
           nuget push "**/${{ env.nugetPackageName }}*.nupkg" -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_ORG_API_KEY}} -SkipDuplicate

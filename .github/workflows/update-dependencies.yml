@@ -19,7 +19,7 @@ defaults:
     shell: pwsh
 
 jobs:
-  update-nanoframework-dependencies:
+  update-nanoframework-dependemcies:
     name: Update .NET nanoFramework dependencies
     timeout-minutes: 15
     runs-on: windows-latest

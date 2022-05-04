@@ -10,8 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		version.json = version.json
 	EndProjectSection
 EndProject
-Project("{11A8DD76-328B-46DF-9F39-F559912D0360}") = "nanoFramework.ClickDrivers.UnitTests", "UnitTests\nanoFramework.ClickDrivers.UnitTests.nfproj", "{11C8F54B-A040-4769-B809-D5B24D9BCB6F}"
-EndProject
+<!--Project("{11A8DD76-328B-46DF-9F39-F559912D0360}") = "nanoFramework.ClickDrivers.UnitTests", "UnitTests\nanoFramework.ClickDrivers.UnitTests.nfproj", "{11C8F54B-A040-4769-B809-D5B24D9BCB6F}"
+EndProject -->
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
