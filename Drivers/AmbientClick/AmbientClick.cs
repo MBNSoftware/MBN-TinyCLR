@@ -11,7 +11,11 @@
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
+#if (NANOFRAMEWORK_1_0)
+using Windows.Devices.Adc;
+#else
 using GHIElectronics.TinyCLR.Devices.Adc;
+#endif
 
 using System;
 using System.Threading;
@@ -92,18 +96,22 @@ namespace MBN.Modules
 
         public AmbientClick(Hardware.Socket socket)
         {
+#if (NANOFRAMEWORK_1_0)
+            _ambient = AdcController.GetDefault().OpenChannel(socket.AdcChannel);
+#else
             _ambient = AdcController.FromName(socket.AdcController).OpenChannel(socket.AdcChannel);
+#endif
         }
 
-        #endregion
+#endregion
 
-        #region Private Fields
+#region Private Fields
 
         private readonly AdcChannel _ambient;
 
-        #endregion
+#endregion
 
-        #region Public Methods
+#region Public Methods
 
         /// <summary>
         /// Reads the light intensity in mW/cm2
@@ -130,6 +138,6 @@ namespace MBN.Modules
             return ((average * 3300) / 4095) / 7;
         }
 
-        #endregion
+#endregion
     }
 }

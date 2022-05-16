@@ -11,14 +11,21 @@
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.Gpio;
+using Windows.Devices.Spi;
+using nanoFramework.UI;
+using nanoFramework.Presentation;
+#else
 using GHIElectronics.TinyCLR.Devices.Gpio;
 using GHIElectronics.TinyCLR.Devices.Spi;
-
+using System.Drawing;
 using Microsoft.SPOT;
+#endif
 
 using System;
-using System.Drawing;
 using System.Threading;
+
 
 namespace MBN.Modules
 {
@@ -253,18 +260,35 @@ namespace MBN.Modules
 		public OLEDCClick(Hardware.Socket socket)
 		{
 			_socket = socket;
-            SpiConnectionSettings settings = new SpiConnectionSettings
+#if (NANOFRAMEWORK_1_0)
+            _oled = SpiDevice.FromId(socket.SpiBus, new SpiConnectionSettings(socket.Cs)
+            {
+                Mode = SpiMode.Mode3,
+                ClockFrequency = 40 * 1000 * 1000
+            });
+
+			_resetPin = new GpioController().OpenPin(socket.Rst);
+			_resetPin.SetPinMode(PinMode.Output);
+			_resetPin.Write(PinValue.High);
+
+			_dataCommandPin = new GpioController().OpenPin(socket.PwmPin);
+			_dataCommandPin.SetPinMode(PinMode.Output);
+			_dataCommandPin.Write(PinValue.High);
+
+			_readWritePin = new GpioController().OpenPin(socket.AnPin);
+			_readWritePin.SetPinMode(PinMode.Output);
+			_readWritePin.Write(PinValue.High);
+#else
+            _oled = SpiController.FromName(socket.SpiBus).GetDevice(new SpiConnectionSettings()
             {
                 ChipSelectType = SpiChipSelectType.Gpio,
                 ChipSelectLine = GpioController.GetDefault().OpenPin(socket.Cs),
-                ChipSelectActiveState = false,
+				ChipSelectActiveState = false,
                 Mode = SpiMode.Mode3,
                 ClockFrequency = 40 * 1000 * 1000
-            };
+            });
 
-            _oled = SpiController.FromName(socket.SpiBus).GetDevice(settings);
-
-            _resetPin = GpioController.GetDefault().OpenPin(socket.Rst);
+			_resetPin = GpioController.GetDefault().OpenPin(socket.Rst);
             _resetPin.SetDriveMode(GpioPinDriveMode.Output);
             _resetPin.Write(GpioPinValue.High);
 
@@ -275,6 +299,7 @@ namespace MBN.Modules
             _readWritePin = GpioController.GetDefault().OpenPin(socket.AnPin);
             _readWritePin.SetDriveMode(GpioPinDriveMode.Output);
             _readWritePin.Write(GpioPinValue.High);
+#endif
 
 			Canvas = new MikroBitmap(_canvasWidth, _canvasHeight);
 
@@ -517,11 +542,17 @@ namespace MBN.Modules
                 }
 				case ResetModes.Hard:
 				{
+#if (NANOFRAMEWORK_1_0)
+						_resetPin.Write(PinValue.High);
+						_dataCommandPin.Write(PinValue.High);
+						_readWritePin.Write(PinValue.High);
+#else
 					_resetPin.Write(GpioPinValue.High);
 					_dataCommandPin.Write(GpioPinValue.High);
 					_readWritePin.Write(GpioPinValue.High);
+#endif
 
-					InitilizeOLED();
+						InitilizeOLED();
 					break;
 				}
 				default:
@@ -549,18 +580,27 @@ namespace MBN.Modules
 			SendCommand(SEPS114A_DISPLAY_ON_OFF, (Byte)(on ? 0x01 : 0x00));
 		}
 
-		#endregion
+#endregion
 
-		#region Private Methods
+#region Private Methods
 
         private void InitilizeOLED()
 		{
+#if (NANOFRAMEWORK_1_0)
+			_readWritePin.Write(PinValue.Low);
+			Thread.Sleep(100);
+
+			_resetPin.Write(PinValue.Low);
+			Thread.Sleep(10);
+			_resetPin.Write(PinValue.High);
+#else
 			_readWritePin.Write(GpioPinValue.Low);
 			Thread.Sleep(100);
 
 			_resetPin.Write(GpioPinValue.Low);
 			Thread.Sleep(10);
 			_resetPin.Write(GpioPinValue.High);
+#endif
 			Thread.Sleep(10);
 
 			/*  Soft reset */
@@ -635,31 +675,47 @@ namespace MBN.Modules
 		{
             lock (_socket.LockSpi)
             {
-                _dataCommandPin.Write(GpioPinValue.Low);
+#if (NANOFRAMEWORK_1_0)
+				_dataCommandPin.Write(PinValue.Low);
+                _oled.Write(new[] { reg_index });
+
+                _dataCommandPin.Write(PinValue.High);
+                _oled.Write(new[] { reg_value });
+#else
+				_dataCommandPin.Write(GpioPinValue.Low);
                 _oled.Write(new[] { reg_index });
 
                 _dataCommandPin.Write(GpioPinValue.High);
                 _oled.Write(new[] { reg_value });
+#endif
 
-            }
-        }
+			}
+		}
 
 		// Send data  as byte[] to OLED C display
         private void SendData(Byte[] data_value)
 		{
 			lock (_socket.LockSpi)
 			{
-                _dataCommandPin.Write(GpioPinValue.High);
-                _oled.Write(data_value);
+#if (NANOFRAMEWORK_1_0)
+				_dataCommandPin.Write(PinValue.High);
+#else
+				_dataCommandPin.Write(GpioPinValue.High);
+#endif
+				_oled.Write(data_value);
             }
         }
 
 		// Send data as UInt16[] to OLED C display
         private void SendData(UInt16[] data)
 		{
-            _dataCommandPin.Write(GpioPinValue.High);
+#if (NANOFRAMEWORK_1_0)
+			_dataCommandPin.Write(PinValue.High);
+#else
+			_dataCommandPin.Write(GpioPinValue.High);
+#endif
 
-            lock (_socket.LockSpi)
+			lock (_socket.LockSpi)
             {
                 for (Int32 x = 0; x < data.Length; x++)
                 {
@@ -671,9 +727,13 @@ namespace MBN.Modules
 		// Enable writing data to memory of the OLED C Display
         private void EnableDDRAMAccess()
         {
-            _dataCommandPin.Write(GpioPinValue.Low);
+#if (NANOFRAMEWORK_1_0)
+			_dataCommandPin.Write(PinValue.Low);
+#else
+			_dataCommandPin.Write(GpioPinValue.Low);
+#endif
 
-            lock (_socket.LockSpi)
+			lock (_socket.LockSpi)
             {
                 _oled.Write(new[] { SEPS114A_DDRAM_DATA_ACCESS_PORT });
             }
@@ -705,7 +765,7 @@ namespace MBN.Modules
 			return true;
 		}
 
-		#endregion
+#endregion
 
 	}
 }

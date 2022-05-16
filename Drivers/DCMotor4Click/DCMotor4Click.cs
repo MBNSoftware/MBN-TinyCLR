@@ -11,8 +11,14 @@
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.Gpio;
+using Windows.Devices.Pwm;
+#else
 using GHIElectronics.TinyCLR.Devices.Gpio;
 using GHIElectronics.TinyCLR.Devices.Pwm;
+#endif
+
 using System;
 using System.Threading;
 
@@ -24,7 +30,11 @@ namespace MBN.Modules
         private readonly GpioPin _enable;
         private readonly GpioPin _direction;
         private Boolean _motorEnabled;
+#if (NANOFRAMEWORK_1_0)
+        private readonly PwmPin _pwmOut;
+#else
         private readonly PwmChannel _pwmOut;
+#endif
         private Int32 _rampIncrement, _rampWaitTime;
 
         /// <summary>
@@ -41,6 +51,16 @@ namespace MBN.Modules
         /// <param name="frequency">PWM frequency. Depends on the motor.</param>
         public DCMotor4Click(Hardware.Socket socket, Double frequency = 1000.0)
         {
+#if (NANOFRAMEWORK_1_0)
+            _enable = new GpioController().OpenPin(socket.Cs, PinMode.Output);
+            _enable.Write(PinValue.High);
+
+            _direction = new GpioController().OpenPin(socket.AnPin, PinMode.Output);
+            _direction.Write(PinValue.High);
+
+            var controller = PwmController.FromId(socket.PwmController);
+            _pwmOut = controller.OpenPin(socket.PwmChannel);
+#else
             _enable = GpioController.GetDefault().OpenPin(socket.Cs);
             _enable.SetDriveMode(GpioPinDriveMode.Output);
             _enable.Write(GpioPinValue.High);
@@ -51,6 +71,7 @@ namespace MBN.Modules
 
             var controller = PwmController.FromName(socket.PwmController);
             _pwmOut = controller.OpenChannel(socket.PwmChannel);
+#endif
             controller.SetDesiredFrequency(frequency);
 
             // Motor not running at startup
@@ -80,7 +101,11 @@ namespace MBN.Modules
             get => _motorEnabled;
             set
             {
+#if (NANOFRAMEWORK_1_0)
+                _enable.Write(value ? PinValue.Low : PinValue.High);
+#else
                 _enable.Write(value ? GpioPinValue.Low : GpioPinValue.High);
+#endif
                 _motorEnabled = !value;
             }
         }
@@ -98,8 +123,13 @@ namespace MBN.Modules
                 _pwmOut.Stop();
                 Thread.Sleep(200);
             }
+#if (NANOFRAMEWORK_1_0)
+            _direction.Write(direction == Directions.Backward ? PinValue.Low : PinValue.High);
+            _enable.Write(PinValue.Low);
+#else
             _direction.Write(direction == Directions.Backward ? GpioPinValue.Low : GpioPinValue.High);
             _enable.Write(GpioPinValue.Low);
+#endif
             if (rampTime == 0)
             {
                 _pwmOut.SetActiveDutyCyclePercentage(speed);
@@ -129,7 +159,11 @@ namespace MBN.Modules
             {
                 _pwmOut.Stop();
                 IsMoving = false;
+#if (NANOFRAMEWORK_1_0)
+                _enable.Write(PinValue.High);
+#else
                 _enable.Write(GpioPinValue.High);
+#endif
             }
             else
             {
@@ -140,7 +174,7 @@ namespace MBN.Modules
             _pwmOut.SetActiveDutyCyclePercentage(0.0);
         }
 
-        #region Private methods
+#region Private methods
         private void RampUp()
         {
             var i = 0;
@@ -171,9 +205,13 @@ namespace MBN.Modules
             }
             _pwmOut.Stop();
             IsMoving = false;
+#if (NANOFRAMEWORK_1_0)
+            _enable.Write(PinValue.High);
+#else
             _enable.Write(GpioPinValue.High);
+#endif
         }
-        #endregion
+#endregion
     }
 }
 

@@ -346,7 +346,7 @@ namespace MBN.Modules
 
                 _cluster.SetMarker(BlockMarkers.PendingCluster);
                 _cluster.SetFileName(destFileName);
-                _cluster.SetCreationTime(DateTime.Now);
+                _cluster.SetCreationTime(DateTime.UtcNow);
                 _cluster.SetObjId(newObjId);
 
                 var newClusterId = WriteToLog(_cluster, 0, _blockDriver.ClusterSize);
@@ -652,7 +652,7 @@ namespace MBN.Modules
             _cluster.SetObjId(newObjId);
             _cluster.SetBlockId(0);
             _cluster.SetFileName(fileName);
-            _cluster.SetCreationTime(DateTime.Now);
+            _cluster.SetCreationTime(DateTime.UtcNow);
 
             // Create the FileRef
             file = new FileRef { ObjId = newObjId, FileSize = 0 };
@@ -1039,7 +1039,7 @@ namespace MBN.Modules
         private void PartialCompact()
         {
             // ReSharper disable once UnusedVariable
-            DateTime starTime = DateTime.Now;
+            DateTime starTime = DateTime.UtcNow;
             try
             {
                 _compacting = true;
@@ -1070,7 +1070,7 @@ namespace MBN.Modules
             finally
             {
 #if DEBUG
-                Debug.WriteLine("Partial Compact: " + ((DateTime.Now - starTime).Ticks / TimeSpan.TicksPerSecond).ToString());
+                Debug.WriteLine("Partial Compact: " + ((DateTime.UtcNow - starTime).Ticks / TimeSpan.TicksPerSecond).ToString());
 #endif
                 _compacting = false;
             }

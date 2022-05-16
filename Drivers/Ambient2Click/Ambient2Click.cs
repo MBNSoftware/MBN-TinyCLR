@@ -16,7 +16,11 @@
  * 
  */
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.I2c;
+#else
 using GHIElectronics.TinyCLR.Devices.I2c;
+#endif
 
 using System;
 
@@ -79,7 +83,11 @@ namespace MBN.Modules
         public Ambient2Click(Hardware.Socket socket, I2CAddresses slaveAddress)
         {
             _socket = socket;
+#if (NANOFRAMEWORK_1_0)
+            _sensor = I2cDevice.Create(new I2cConnectionSettings(socket.I2cBus, (int)slaveAddress, I2cBusSpeed.StandardMode));
+#else
             _sensor = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings((Int32) slaveAddress, 100000));
+#endif
 
             if (GetDeviceId() != 0x3001) throw new DeviceInitialisationException("Ambient2 Click not found on the I2C Bus.");
 
@@ -615,7 +623,7 @@ namespace MBN.Modules
             Int32 exponent = dataSum >> 12;
             Int32 mantissa = dataSum & 0xFFF;
 
-            return (Int32) (0.01 * Math.Pow(2, exponent) * mantissa);
+            return (Int32) (0.01 * Math.Pow(2.0, exponent) * mantissa);
         }
 
         private Byte[] LuxToBytes(Double lux)

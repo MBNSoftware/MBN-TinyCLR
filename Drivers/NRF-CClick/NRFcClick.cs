@@ -24,8 +24,14 @@
 // 2020, April 07 : Modified by MBN to comply with MBN drivers' scheme and use of SPI for TinyCLR 2.0
 #endregion
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.Gpio;
+using System.Device.Spi;
+#else
 using GHIElectronics.TinyCLR.Devices.Gpio;
 using GHIElectronics.TinyCLR.Devices.Spi;
+#endif
+
 using System;
 using System.Diagnostics;
 using System.Threading;
@@ -81,6 +87,24 @@ namespace MBN.Modules
         {
             _socket = socket;
             // Initialize SPI
+#if (NANOFRAMEWORK_1_0)
+            _nrf = SpiDevice.Create(new SpiConnectionSettings(socket.SpiBus, socket.Cs)
+            {
+                Mode = SpiMode.Mode0,
+                ClockFrequency = 2000000
+            });
+
+            // Initialize IRQ Port
+            _irqPin = new GpioController().OpenPin(socket.Int);
+            _irqPin.SetPinMode(PinMode.InputPullUp);
+            _irqPin.ValueChanged += IrqPin_ValueChanged;
+            //_irqPin = new InterruptPort(socket.Int, false, Port.ResistorMode.PullUp, Port.InterruptMode.InterruptEdgeLow);
+
+            // Initialize Chip Enable Port
+            _cePin = new GpioController().OpenPin(socket.Rst);
+            _cePin.SetPinMode(PinMode.Output);
+            _cePin.Write(PinValue.Low);
+#else
             _nrf = SpiController.FromName(socket.SpiBus).GetDevice(new SpiConnectionSettings()
             {
                 ChipSelectType = SpiChipSelectType.Gpio,
@@ -99,6 +123,7 @@ namespace MBN.Modules
             _cePin = GpioController.GetDefault().OpenPin(socket.Rst);
             _cePin.SetDriveMode(GpioPinDriveMode.Output);
             _cePin.Write(GpioPinValue.Low);
+#endif
 
             // Module reset time
             Thread.Sleep(100);
@@ -109,7 +134,11 @@ namespace MBN.Modules
             _transmitFailedFlag = new ManualResetEvent(false);
         }
 
+#if (NANOFRAMEWORK_1_0)
+        private void IrqPin_ValueChanged(object sender, PinValueChangedEventArgs e)
+#else
         private void IrqPin_ValueChanged(GpioPin sender, GpioPinValueChangedEventArgs e)
+#endif
         {
             if (!_initialized)
                 return;
@@ -239,7 +268,11 @@ namespace MBN.Modules
         /// </summary>
         public Boolean IsEnabled
         {
+#if (NANOFRAMEWORK_1_0)
+            get { return _cePin.Read() == PinValue.High; }
+#else
             get { return _cePin.Read() == GpioPinValue.High; }
+#endif
         }
 
         /// <summary>
@@ -517,7 +550,7 @@ namespace MBN.Modules
         /// </summary>
         public Boolean SendTo(Byte[] address, Byte[] bytes, Int32 timeout)
         {
-            DateTime startTime = DateTime.Now;
+            DateTime startTime = DateTime.UtcNow; //TODO: TinyCLR shoulf support UtcNow, if not, this needs an ifdef
 
             while (true)
             {
@@ -530,7 +563,7 @@ namespace MBN.Modules
                 if (WaitHandle.WaitAny(new WaitHandle[] { _transmitSuccessFlag, _transmitFailedFlag }, 200, true) == 0)
                     return true;
 
-                if (DateTime.Now.CompareTo(startTime.AddMilliseconds(timeout)) > 0)
+                if (DateTime.UtcNow.CompareTo(startTime.AddMilliseconds(timeout)) > 0)
                     return false;
 #if DEBUG
                 Debug.WriteLine("Retransmitting packet...");
@@ -543,12 +576,20 @@ namespace MBN.Modules
         private void SetEnabled()
         {
             _irqPin.ValueChanged += IrqPin_ValueChanged;
-            _cePin.Write(GpioPinValue.High);   
+#if (NANOFRAMEWORK_1_0)
+            _cePin.Write(PinValue.High);
+#else
+            _cePin.Write(GpioPinValue.High); 
+#endif
         }
 
         private void SetDisabled()
         {
-            _cePin.Write(GpioPinValue.Low);
+#if (NANOFRAMEWORK_1_0)
+            _cePin.Write(PinValue.Low);
+#else
+            _cePin.Write(GpioPinValue.Low); 
+#endif
             _irqPin.ValueChanged -= IrqPin_ValueChanged;
         }
 

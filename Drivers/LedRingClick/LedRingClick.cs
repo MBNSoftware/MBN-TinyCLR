@@ -11,10 +11,16 @@
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.Spi;
+using System.Device.Gpio;
+#else
 using GHIElectronics.TinyCLR.Devices.Spi;
+using gpio = GHIElectronics.TinyCLR.Devices.Gpio;
+#endif
+
 using System;
 using System.Threading;
-using gpio = GHIElectronics.TinyCLR.Devices.Gpio;
 
 namespace MBN.Modules
 {
@@ -27,10 +33,24 @@ namespace MBN.Modules
         public LedRingClick(Hardware.Socket socket)
         {
             _socket = socket;
+
+#if (NANOFRAMEWORK_1_0)
+            GpioPin _rst = new GpioController().OpenPin(socket.Rst, PinMode.Output);
+            _rst.Write(PinValue.High);
+
+            _ledRing = SpiDevice.Create(new SpiConnectionSettings(socket.SpiBus, socket.Cs)
+            {
+                Mode = SpiMode.Mode3,
+                ClockFrequency = 1000000
+            });
+
+            _rst.Write(PinValue.Low);
+            Thread.Sleep(1);
+            _rst.Write(PinValue.High);
+#else
             gpio.GpioPin _rst = gpio.GpioController.GetDefault().OpenPin(socket.Rst);
             _rst.SetDriveMode(gpio.GpioPinDriveMode.Output);
             _rst.Write(gpio.GpioPinValue.High);
-
             _ledRing = SpiController.FromName(socket.SpiBus).GetDevice(new SpiConnectionSettings()
             {
                 ChipSelectType = SpiChipSelectType.Gpio,
@@ -42,6 +62,8 @@ namespace MBN.Modules
             _rst.Write(gpio.GpioPinValue.Low);
             Thread.Sleep(1);
             _rst.Write(gpio.GpioPinValue.High);
+#endif
+
         }
 
         public void Write(UInt32 data)

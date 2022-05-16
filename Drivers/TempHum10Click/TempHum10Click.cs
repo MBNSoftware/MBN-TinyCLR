@@ -12,8 +12,13 @@
 
 #region Usings
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.Gpio;
+using System.Device.I2c;
+#else
 using GHIElectronics.TinyCLR.Devices.Gpio;
 using GHIElectronics.TinyCLR.Devices.I2c;
+#endif
 
 using System;
 using System.Threading;
@@ -71,11 +76,19 @@ namespace MBN.Modules
         public TempHum10Click(Hardware.Socket socket)
         {
             _socket = socket;
-            _sensor = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings(0x7F, 100000));
+#if (NANOFRAMEWORK_1_0)
+            _sensor = I2cDevice.Create(new I2cConnectionSettings(socket.I2cBus, 0x7F, I2cBusSpeed.StandardMode));
+
+            _chipEnable = new GpioController().OpenPin(socket.Cs);
+            _chipEnable.SetPinMode(PinMode.Output);
+            _chipEnable.Write(PinValue.Low);
+#else
+			_sensor = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings(0x7F, 100000));
 
             _chipEnable = GpioController.GetDefault().OpenPin(socket.Cs);
             _chipEnable.SetDriveMode(GpioPinDriveMode.Output);
             _chipEnable.Write(GpioPinValue.Low);
+#endif
 
             PowerMode = PowerModes.On;
 
@@ -190,12 +203,21 @@ namespace MBN.Modules
         /// </value>
         public PowerModes PowerMode
         {
+#if (NANOFRAMEWORK_1_0)
+            get => _chipEnable.Read() == PinValue.High ? PowerModes.On : PowerModes.Low;
+            set
+            {
+                if (value == PowerModes.Off) throw new NotSupportedException("This module does not support PowerModes.Off");
+                _chipEnable.Write(value == PowerModes.On ? PinValue.High : PinValue.Low);
+            }
+#else
             get => _chipEnable.Read() == GpioPinValue.High ? PowerModes.On : PowerModes.Low;
             set
             {
                 if (value == PowerModes.Off) throw new NotSupportedException("This module does not support PowerModes.Off");
                 _chipEnable.Write(value == PowerModes.On ? GpioPinValue.High : GpioPinValue.Low);
             }
+#endif
         }
 
         /// <summary>
@@ -279,9 +301,9 @@ namespace MBN.Modules
         /// </example>
         public TemperatureUnits TemperatureUnits { get; set; }
 
-        #endregion
+#endregion
 
-        #region Private Methods
+#region Private Methods
 
         private void WriteRegister(Byte registerAddress, Byte data)
         {
@@ -317,9 +339,9 @@ namespace MBN.Modules
             return (ReadRegister(BPS230_REG_CONFIG)[0] & 0x01) == 0x01;
         }
 
-        #endregion
+#endregion
 
-        #region Interface Implementations
+#region Interface Implementations
 
         /// <inheritdoc cref="IHumidity" />
         /// <summary>
@@ -441,6 +463,6 @@ namespace MBN.Modules
             }
         }
 
-        #endregion
+#endregion
     }
 }

@@ -68,6 +68,7 @@
 |FTDIClick|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/FTDIClick)
 |GNSSClick|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/GNSSClick)
 |GNSS4Click|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/Gnss4Click)
+|GNSS5Click|:heavy_check_mark:|:clock130:||[:floppy_disk:](Drivers/Gnss5Click)
 |GnssZoeClick|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/GnssZoeClick)
 |GPS2Click|:heavy_check_mark:|:heavy_check_mark:||[:floppy_disk:](Drivers/GPS2Click)
 |GPS3Click|:heavy_check_mark:|:clock130:||

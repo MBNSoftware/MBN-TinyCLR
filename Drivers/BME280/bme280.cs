@@ -11,7 +11,11 @@
 
 #region Usings
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.I2c;
+#else
 using GHIElectronics.TinyCLR.Devices.I2c;
+#endif
 
 using System;
 using System.Threading;
@@ -89,7 +93,11 @@ namespace MBN.Modules
         public BME280(Hardware.Socket socket, I2CAddresses slaveAddress)
         {
             _socket = socket;
+#if (NANOFRAMEWORK_1_0)
+            _sensor = I2cDevice.Create(new I2cConnectionSettings(socket.I2cBus, (int)slaveAddress, I2cBusSpeed.StandardMode));
+#else
             _sensor = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings((Int32) slaveAddress, 100000));
+#endif
 
             Reset(ResetModes.Soft);
 
@@ -841,7 +849,11 @@ namespace MBN.Modules
             Byte[] readBuffer = new Byte[bytesToRead];
             lock (_socket.LockI2c)
             {
+#if (NANOFRAMEWORK_1_0)
+                _sensor.WriteRead(writeBuffer, readBuffer);
+#else
                 _sensor?.WriteRead(writeBuffer, readBuffer);
+#endif
             }
             return readBuffer;
         }
@@ -907,9 +919,9 @@ namespace MBN.Modules
             WriteByte(REG_CTRL_MEAS, registerData);
         }
 
-        #endregion
+#endregion
 
-        #region Interface Implementations
+#region Interface Implementations
 
         /// <inheritdoc cref="IPressure" />
         /// <summary>
@@ -1121,6 +1133,6 @@ namespace MBN.Modules
             }
         }
 
-        #endregion
+#endregion
     }
 }

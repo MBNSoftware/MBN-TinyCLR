@@ -10,8 +10,14 @@
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.Gpio;
+using System.Device.I2c;
+#else
 using GHIElectronics.TinyCLR.Devices.Gpio;
 using GHIElectronics.TinyCLR.Devices.I2c;
+#endif
+
 using System;
 using System.Threading;
 
@@ -62,16 +68,28 @@ namespace MBN.Modules
         private readonly I2cDevice _mux;
         private readonly Hardware.Socket _socket;
 
+#if (NANOFRAMEWORK_1_0)
+        public I2CMuxClick(Hardware.Socket socket, byte address, I2cBusSpeed busSpeed)
+#else
         public I2CMuxClick(Hardware.Socket socket, Byte address, UInt32 busSpeed)
+#endif
         {
             _socket = socket;
+#if (NANOFRAMEWORK_1_0)
+            _mux = I2cDevice.Create(new I2cConnectionSettings(socket.I2cBus, address, busSpeed));
+            _rst = new GpioController().OpenPin(socket.Rst);
+            _rst.SetPinMode(PinMode.Output);
+            _rst.Write(PinValue.Low);
+            Thread.Sleep(100);
+            _rst.Write(PinValue.High);
+#else
             _mux = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings(address, busSpeed));
-
             _rst = GpioController.GetDefault().OpenPin(socket.Rst);
             _rst.SetDriveMode(GpioPinDriveMode.Output);
             _rst.Write(GpioPinValue.Low);
             Thread.Sleep(100);
             _rst.Write(GpioPinValue.High);
+#endif
         }
 
         /// <summary>

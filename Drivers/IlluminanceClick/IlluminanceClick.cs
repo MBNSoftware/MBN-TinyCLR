@@ -13,7 +13,12 @@
 // ToDo - Add Methodology and Property/Method to enable/disable Interrupt signaling when light Levels is outside set ranges.
 // ToDo - Implement manual integration timePeriod.
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.I2c;
+#else
 using GHIElectronics.TinyCLR.Devices.I2c;
+#endif
+
 using System;
 using System.Threading;
 
@@ -169,13 +174,17 @@ namespace MBN.Modules
 		public IlluminanceClick(Hardware.Socket socket, I2CAddress slaveAddress)
 		{
 			_socket = socket;
+#if (NANOFRAMEWORK_1_0)
+			_illuminance = I2cDevice.Create(new I2cConnectionSettings(socket.I2cBus, (int)slaveAddress, I2cBusSpeed.FastMode));
+#else
 			_illuminance = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings((Int32) slaveAddress, 4000000));
+#endif
 			if (!Init()) throw new DeviceInitialisationException($"Error initializing device at address 0x{slaveAddress:x2}");
 		}
 
-		#endregion
+#endregion
 
-		#region Fields
+#region Fields
 
 		private IntegrationTimePeriod _integrationTime = IntegrationTimePeriod._402MS;
 		private GainControl _gainControl = GainControl.Low;
@@ -186,9 +195,9 @@ namespace MBN.Modules
 		//I2C
 		private readonly I2cDevice _illuminance;       // I²C configuration
 
-		#endregion
+#endregion
 
-		#region Constants
+#region Constants
 
 		// Used to Calculate Lux
 		private const Byte LUX_LUXSCALE = 14; // scale by 2^14
@@ -245,11 +254,11 @@ namespace MBN.Modules
 		private const UInt16 CLIPPING_101MS = 37000;
 		private const UInt16 CLIPPING_402MS = 65000;
 
-		#endregion
+#endregion
 
-		#region ENUMS
+#region ENUMS
 
-		#region Private ENUMS
+#region Private ENUMS
 
 		private enum AddressRegisters
 		{
@@ -288,9 +297,9 @@ namespace MBN.Modules
 			PowerOn = 0x03
 		}
 
-		#endregion
+#endregion
 
-		#region Public ENUMS
+#region Public ENUMS
 
 		/// <summary>
 		/// Hardware based I2C Address Selection (J1)
@@ -350,11 +359,11 @@ namespace MBN.Modules
 			High = 1
 		}
 
-		#endregion
+#endregion
 
-		#endregion
+#endregion
 
-		#region Private Methods
+#region Private Methods
 
 		private Boolean Init()
 		{
@@ -456,9 +465,9 @@ namespace MBN.Modules
 			return value;
 		}
 
-		#endregion
+#endregion
 
-		#region Public Properties
+#region Public Properties
 
 		/// <summary>
 		/// Gets or sets the power mode of the Illuminance Click.
@@ -843,9 +852,9 @@ namespace MBN.Modules
 			}
 		}
 
-		#endregion
+#endregion
 
-		#region Public Methods
+#region Public Methods
 
 		/// <summary>
 		/// Initializes the Illuminance Click with the default values.
@@ -1140,7 +1149,7 @@ namespace MBN.Modules
 			// strip off fractional portion and return LUX
 			return (UInt32)(temp >> LUX_LUXSCALE);
 		}
-		#endregion
+#endregion
 	}
 }
 

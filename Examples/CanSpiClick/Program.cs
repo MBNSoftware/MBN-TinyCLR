@@ -1,5 +1,10 @@
-﻿using GHIElectronics.TinyCLR.Devices.Can;
+﻿#if (NANOFRAMEWORK_1_0)
+using Windows.Devices.Can;
+#else
+using GHIElectronics.TinyCLR.Devices.Can;
 using GHIElectronics.TinyCLR.Pins;
+#endif
+
 using MBN;
 using MBN.Modules;
 using System;
@@ -23,20 +28,30 @@ namespace Examples
 
         public static void TestCanSpi()
         {
-            // Initialize CanSpi Click module on SC20260D socket #2
-            _canSpi = new CanSpiClick(Hardware.SC20260_2);
-            if (_canSpi.Init("CAN#1", CanSpiClick.Baudrate500k, CanSpiClick.normalMode))
+            // Initialize CanSpi Click module on socket #2
+            _canSpi = new CanSpiClick(Hardware.SocketTwo);
+            if (_canSpi.Init("CAN#1", CanSpiClick.Baudrate500k, CanSpiClick.Mode.NormalMode))
                 Debug.WriteLine("CAN#1 @ 500kbps");
             else
                 throw new NotImplementedException("CanSpiClick initialization failed!");
             _canSpi.MessageReceived += CAN1_MessageReceived;
+#if (NANOFRAMEWORK_1_0)
+            // set settings for CAN controller (baudRatePrescaler, phaseSegment1, phaseSegment2, syncJumpWidth)
+            CanSettings canSettings = new CanSettings(6, 13, 2, 1);
 
+            // get controller for CAN1 (STM32F407)
+            _onboardCan = CanController.FromId("CAN1", canSettings);
+            _onboardCan.ErrorOccurred += Can_ErrorReceived;
+#else
             // Initialize SC20260D onboard Can
             _onboardCan = CanController.FromName(STM32H7.CanBus.Can1);
             _onboardCan.SetNominalBitTiming(new CanBitTiming(propagationPhase1: 13, phase2: 2, baudratePrescaler: 6, synchronizationJumpWidth: 1, useMultiBitSampling: false));
             _onboardCan.Enable();
-            _onboardCan.MessageReceived += Can_MessageReceived;
             _onboardCan.ErrorReceived += Can_ErrorReceived;
+#endif
+
+            _onboardCan.MessageReceived += Can_MessageReceived;
+            
 
             CanSpiToOnboardCan();
             OnboardCanToCanSpi();
@@ -108,6 +123,10 @@ namespace Examples
             Debug.WriteLine("************");
         }
 
+#if (NANOFRAMEWORK_1_0)
+        private static void Can_ErrorReceived(CanController sender, ErrorOccurredEventArgs e) => Debug.WriteLine("Onboard Can error : " + e.ToString());
+#else
         private static void Can_ErrorReceived(CanController sender, ErrorReceivedEventArgs e) => Debug.WriteLine("Onboard Can error : " + e.ToString());
+#endif
     }
 }

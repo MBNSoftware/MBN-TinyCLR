@@ -1,5 +1,11 @@
-﻿using GHIElectronics.TinyCLR.Devices.Gpio;
+﻿#if (NANOFRAMEWORK_1_0)
+using System.Device.Gpio;
+using System.Device.Spi;
+#else
+using GHIElectronics.TinyCLR.Devices.Gpio;
 using GHIElectronics.TinyCLR.Devices.Spi;
+#endif
+
 using System;
 using System.Threading;
 
@@ -21,6 +27,13 @@ namespace MBN.Modules
             _sl.MessageAvailable += Sl_MessageAvailable;
 
             // Initialize SPI
+#if (NANOFRAMEWORK_1_0)
+            _zoe = SpiDevice.Create(new SpiConnectionSettings(socket.SpiBus, socket.Cs)
+            {
+                Mode = SpiMode.Mode0,
+                ClockFrequency = 4000000
+            });
+#else
             _zoe = SpiController.FromName(socket.SpiBus).GetDevice(new SpiConnectionSettings()
             {
                 ChipSelectType = SpiChipSelectType.Gpio,
@@ -28,6 +41,7 @@ namespace MBN.Modules
                 Mode = SpiMode.Mode0,
                 ClockFrequency = 4000000
             });
+#endif
 
             _rBuff = new Byte[1024];
 

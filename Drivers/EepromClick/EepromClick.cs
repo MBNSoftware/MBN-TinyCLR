@@ -11,10 +11,16 @@
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
+#if (NANOFRAMEWORK_1_0)
+using gpio = System.Device.Gpio;
+using System.Device.I2c;
+#else
 using GHIElectronics.TinyCLR.Devices.I2c;
+using gpio = GHIElectronics.TinyCLR.Devices.Gpio;
+#endif
+
 using System;
 using System.Threading;
-using gpio = GHIElectronics.TinyCLR.Devices.Gpio;
 
 namespace MBN.Modules
 {
@@ -96,11 +102,19 @@ namespace MBN.Modules
         {
             _socket = socket;
             // Create the driver's I²C configuration
+#if (NANOFRAMEWORK_1_0)
+            _eeprom = I2cDevice.Create(new I2cConnectionSettings(socket.I2cBus, address, I2cBusSpeed.StandardMode));
+            _memorysize = memorySize * 1024;
+            gpio.GpioPin _wp = new gpio.GpioController().OpenPin(socket.PwmPin);
+            _wp.SetPinMode(gpio.PinMode.Output);
+            _wp.Write(gpio.PinValue.Low);
+#else
             _eeprom = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings(address, 100000));
             _memorysize = memorySize * 1024;
             gpio.GpioPin _wp = gpio.GpioController.GetDefault().OpenPin(socket.PwmPin);
             _wp.SetDriveMode(gpio.GpioPinDriveMode.Output);
             _wp.Write(gpio.GpioPinValue.Low);
+#endif
         }
 
         /// <summary>

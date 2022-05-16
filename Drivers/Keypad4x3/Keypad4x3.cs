@@ -11,7 +11,12 @@
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.Gpio;
+#else
 using GHIElectronics.TinyCLR.Devices.Gpio;
+#endif
+
 using System;
 using System.Threading;
 
@@ -80,6 +85,32 @@ namespace MBN.Modules
         /// <param name="column3">Pin connected to the third column</param>
         public Keypad4X3(Int32 row1, Int32 row2, Int32 row3, Int32 row4, Int32 column1, Int32 column2, Int32 column3)
         {
+#if (NANOFRAMEWORK_1_0)
+            var gpioController = new GpioController();
+            _rows = new []
+            {
+                gpioController.OpenPin(row1),
+                gpioController.OpenPin(row2),
+                gpioController.OpenPin(row3),
+                gpioController.OpenPin(row4),
+            };
+            for (var i=0; i<4; i++)
+            {
+                _rows[i].SetPinMode(PinMode.Output);
+                _rows[i].Write(PinValue.Low);
+            }
+
+            _columns = new[]
+            {
+                gpioController.OpenPin(column1),
+                gpioController.OpenPin(column2),
+                gpioController.OpenPin(column3),
+            };
+            for (var i = 0; i < 3; i++)
+            {
+                _columns[i].SetPinMode(PinMode.InputPullDown);
+            }
+#else
             _rows = new []
             {
                 GpioController.GetDefault().OpenPin(row1),
@@ -103,6 +134,7 @@ namespace MBN.Modules
             {
                 _columns[i].SetDriveMode(GpioPinDriveMode.InputPullDown);
             }
+#endif
         }
 
         /// <summary>
@@ -172,11 +204,19 @@ namespace MBN.Modules
 
         private static Boolean ReadMatrix(Int32 row, Int32 column)
         {
+#if (NANOFRAMEWORK_1_0)
+            _rows[row].Write(PinValue.High);
+            PinValue colState = _columns[column].Read();
+            _rows[row].Write(PinValue.Low);
+
+            return colState == PinValue.High;
+#else
             _rows[row].Write(GpioPinValue.High);
             GpioPinValue colState = _columns[column].Read();
             _rows[row].Write(GpioPinValue.Low);
 
             return colState == GpioPinValue.High;
+#endif
         }
 
         private static Char KeytoChar(Int32 keyValue)

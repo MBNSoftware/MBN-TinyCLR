@@ -14,7 +14,11 @@
 
 using System;
 using System.Threading;
+#if (NANOFRAMEWORK_1_0)
+using System.Device.I2c;
+#else
 using GHIElectronics.TinyCLR.Devices.I2c;
+#endif
 
 #endregion
 
@@ -79,7 +83,11 @@ namespace MBN.Modules
         public TempHum11Click(Hardware.Socket socket)
         {
             _socket = socket;
-            _sensor = I2cController.FromName(socket.I2cBus) .GetDevice(new I2cConnectionSettings(0x40, 100000));
+#if (NANOFRAMEWORK_1_0)
+            _sensor = I2cDevice.Create(new I2cConnectionSettings(socket.I2cBus, 0x40, I2cBusSpeed.StandardMode));
+#else
+			_sensor = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings(0x40, 100000));
+#endif
 
             if (GetManufacturerId() != 0x5449 && GetDeviceId() != 0x1000)
             {
@@ -276,7 +284,7 @@ namespace MBN.Modules
             snValue[1] = readBuffer2[0];
             snValue[0] = readBuffer3[1];
 
-            return BitConverter.ToUInt32(snValue, 0);
+            return System.BitConverter.ToUInt32(snValue, 0);
         }
 
         /// <summary>

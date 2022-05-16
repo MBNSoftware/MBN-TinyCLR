@@ -12,9 +12,15 @@
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
+ #if (NANOFRAMEWORK_1_0)
+using Windows.Devices.SerialCommunication;
+using Windows.Storage.Streams;
+#else
+using GHIElectronics.TinyCLR.Devices.Uart;
+#endif
+
 using System;
 using System.Text;
-using GHIElectronics.TinyCLR.Devices.Uart;
 
 namespace MBN.Modules
 {
@@ -28,11 +34,17 @@ namespace MBN.Modules
         {
             #region .ctor
 
+#if (NANOFRAMEWORK_1_0)
+            internal SimpleSerial(SerialDevice uartController)
+            {
+                _serial = uartController;
+#else
             internal SimpleSerial(UartController uartController)
             {
                 _serial = uartController;
                 _serial.ClearReadBuffer();
                 _serial.ClearWriteBuffer();
+#endif
             }
 
             #endregion
@@ -40,7 +52,11 @@ namespace MBN.Modules
             #region Fields
 
             private String _remainder;
+#if (NANOFRAMEWORK_1_0)
+            private readonly SerialDevice _serial;
+#else
             private readonly UartController _serial;
+#endif
 
             #endregion
 
@@ -53,9 +69,9 @@ namespace MBN.Modules
             /// </summary>
             internal String Remainder => _remainder;
 
-            #endregion
+#endregion
 
-            #region Internal Methods
+#region Internal Methods
 
             /// <summary>
             ///     Writes the specified string to the serial port.
@@ -63,7 +79,15 @@ namespace MBN.Modules
             /// <param name="txt" />
             internal void Write(String txt)
             {
+#if (NANOFRAMEWORK_1_0)
+                DataWriter outputDataWriter = new DataWriter(_serial.OutputStream);
+                var bytesToWrite = Encoding.UTF8.GetBytes(txt);
+                outputDataWriter.WriteBytes(bytesToWrite);
+                outputDataWriter.Store();
+#else
                 _serial.Write(Encoding.UTF8.GetBytes(txt), 0, txt.Length);
+                _serial.Flush();
+#endif
             }
 
             /// <summary>
@@ -83,10 +107,24 @@ namespace MBN.Modules
             /// </returns>
             internal Byte[] ReadExistingBinary()
             {
+#if (NANOFRAMEWORK_1_0)
+                using (DataReader dataReader = new DataReader(_serial.InputStream))
+                {
+                    dataReader.InputStreamOptions = InputStreamOptions.Partial;
+
+                    var arraySize = _serial.BytesToRead;
+                    byte[] received = new byte[arraySize];
+                    dataReader.Load(arraySize);
+                    dataReader.ReadBytes(received);
+                    return received;
+                }
+#else
                 Int32 arraySize = _serial.BytesToRead;
                 Byte[] received = new Byte[arraySize];
                 _serial.Read(received, 0, arraySize);
                 return received;
+#endif
+
             }
 
             /// <summary>
@@ -112,7 +150,9 @@ namespace MBN.Modules
             internal void Enable()
             {
                 _remainder = String.Empty;
+#if (!NANOFRAMEWORK_1_0)
                 _serial.Enable();
+#endif
             }
 
             /// <summary>
@@ -131,9 +171,9 @@ namespace MBN.Modules
                 return SplitString(_remainder + ReadExisting(), out _remainder, delimiter);
             }
 
-            #endregion
+#endregion
 
-            #region Private Methods
+#region Private Methods
 
             /// <summary>
             ///     Splits a stream into separate lines, given a delimiter.
@@ -238,7 +278,7 @@ namespace MBN.Modules
                 return output;
             }
 
-            #endregion
+#endregion
         }
     }
 }

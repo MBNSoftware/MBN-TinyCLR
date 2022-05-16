@@ -11,7 +11,13 @@
  * 
  */
 
+#if (NANOFRAMEWORK_1_0)
+using Windows.Devices.SerialCommunication;
+using Windows.Storage.Streams;
+#else
 using GHIElectronics.TinyCLR.Devices.Uart;
+#endif
+
 using System;
 
 namespace MBN.Modules
@@ -60,7 +66,11 @@ namespace MBN.Modules
     /// </example>
     public sealed partial class SpeakUpClick
     {
+#if (NANOFRAMEWORK_1_0)
+        private static SerialDevice _sp;
+#else
         private static UartController _sp;
+#endif
         private static Boolean _listening;
 
         /// <summary>
@@ -112,9 +122,19 @@ namespace MBN.Modules
         /// <param name="socket">The socket on which the SpeakUpClick module is plugged on MikroBus.Net board</param>
         public SpeakUpClick(Hardware.Socket socket)
         {
+#if (NANOFRAMEWORK_1_0)
+            _sp = SerialDevice.FromId(socket.ComPort);
+            _sp.BaudRate = 115200;
+            _sp.DataBits = 8;
+            _sp.Parity = SerialParity.None;
+            _sp.StopBits = SerialStopBitCount.One;
+            _sp.Handshake = SerialHandshake.None;
+            //_sp.Enable();
+#else
             _sp = UartController.FromName(socket.ComPort);
             _sp.SetActiveSettings(new UartSetting() { BaudRate = 115200, DataBits = 8, Parity = UartParity.None, StopBits = UartStopBitCount.One, Handshaking = UartHandshake.None });
             _sp.Enable();
+#endif
         }
 
         /// <summary>
@@ -170,17 +190,35 @@ namespace MBN.Modules
                 if (value)
                 {
                     _sp.DataReceived += Sp_DataReceived;
+#if (!NANOFRAMEWORK_1_0)
                     _sp.Enable();
+#endif
                 }
                 else
                 {
-                    _sp.DataReceived += Sp_DataReceived;
+                    _sp.DataReceived -= Sp_DataReceived;
+#if (!NANOFRAMEWORK_1_0)
                     _sp.Disable();
+#endif
                 }
                 _listening = value;
             }
         }
 
+#if (NANOFRAMEWORK_1_0)
+        private void Sp_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            using (DataReader dataReader = new DataReader(_sp.InputStream))
+            {
+                dataReader.InputStreamOptions = InputStreamOptions.Partial;
+                var nb = dataReader.Load(_sp.BytesToRead);
+                var buf = new byte[nb];
+                dataReader.ReadBytes(buf);
+
+                SpeakUpEventHandler speakEvent = SpeakDetected;
+                speakEvent(this, new SpeakUpEventArgs(buf[0]));
+            }
+#else
         private void Sp_DataReceived(UartController sender, DataReceivedEventArgs e)
         {
             var nb = _sp.BytesToRead;
@@ -190,6 +228,8 @@ namespace MBN.Modules
 
             SpeakUpEventHandler speakEvent = SpeakDetected;
             speakEvent(this, new SpeakUpEventArgs(buf[0]));
+#endif
+
         }
     }
 }

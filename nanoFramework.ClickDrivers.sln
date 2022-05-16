@@ -1,0 +1,40 @@
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32210.238
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{11A8DD76-328B-46DF-9F39-F559912D0360}") = "nanoFramework.ClickDrivers", "Drivers\nanoFramework.ClickDrivers.nfproj", "{AF593D8B-80FF-4561-ADBE-220F56FFF432}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BAFE1F60-FD27-41B0-9E8C-117F56001A8C}"
+	ProjectSection(SolutionItems) = preProject
+		nanoFramework.ClickDrivers.nuspec = nanoFramework.ClickDrivers.nuspec
+		version.json = version.json
+	EndProjectSection
+EndProject
+<!--Project("{11A8DD76-328B-46DF-9F39-F559912D0360}") = "nanoFramework.ClickDrivers.UnitTests", "UnitTests\nanoFramework.ClickDrivers.UnitTests.nfproj", "{11C8F54B-A040-4769-B809-D5B24D9BCB6F}"
+EndProject -->
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AF593D8B-80FF-4561-ADBE-220F56FFF432}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF593D8B-80FF-4561-ADBE-220F56FFF432}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF593D8B-80FF-4561-ADBE-220F56FFF432}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{AF593D8B-80FF-4561-ADBE-220F56FFF432}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF593D8B-80FF-4561-ADBE-220F56FFF432}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF593D8B-80FF-4561-ADBE-220F56FFF432}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{11C8F54B-A040-4769-B809-D5B24D9BCB6F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11C8F54B-A040-4769-B809-D5B24D9BCB6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11C8F54B-A040-4769-B809-D5B24D9BCB6F}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{11C8F54B-A040-4769-B809-D5B24D9BCB6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11C8F54B-A040-4769-B809-D5B24D9BCB6F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11C8F54B-A040-4769-B809-D5B24D9BCB6F}.Release|Any CPU.Deploy.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {44C72BA2-B307-4A16-A572-5D8269716C98}
+	EndGlobalSection
+EndGlobal

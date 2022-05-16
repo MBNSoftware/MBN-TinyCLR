@@ -10,7 +10,14 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
+
+#if (NANOFRAMEWORK_1_0)
+using System.Device.Spi;
+#else
+using GHIElectronics.TinyCLR.Devices.Gpio;
 using GHIElectronics.TinyCLR.Devices.Spi;
+#endif
+
 using System;
 
 namespace MBN.Modules
@@ -92,13 +99,21 @@ namespace MBN.Modules
         {
             _socket = socket;
             // Initialize SPI
-            _adc = SpiController.FromName(socket.SpiBus).GetDevice(new SpiConnectionSettings()
+#if (NANOFRAMEWORK_1_0)
+            _adc = SpiDevice.Create(new SpiConnectionSettings(socket.SpiBus, socket.Cs)
             {
-                ChipSelectType = SpiChipSelectType.Gpio,
-                ChipSelectLine = GHIElectronics.TinyCLR.Devices.Gpio.GpioController.GetDefault().OpenPin(socket.Cs),
                 Mode = SpiMode.Mode0,
                 ClockFrequency = 1000000
             });
+#else
+            _adc = SpiController.FromName(socket.SpiBus).GetDevice(new SpiConnectionSettings()
+            {
+                ChipSelectType = SpiChipSelectType.Gpio,
+                ChipSelectLine = GpioController.GetDefault().OpenPin(socket.Cs),
+                Mode = SpiMode.Mode0,
+                ClockFrequency = 1000000
+            });
+#endif
 
             _lastValues = new Int32[4];          // Empty array for last read values
             SetScale();       // No scaling by default

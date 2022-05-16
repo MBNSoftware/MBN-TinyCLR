@@ -11,7 +11,12 @@
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.I2c;
+#else
 using GHIElectronics.TinyCLR.Devices.I2c;
+#endif
+
 using System;
 
 namespace MBN.Modules
@@ -56,7 +61,11 @@ namespace MBN.Modules
         public Proximity3Click(Hardware.Socket socket, Byte address = 0x51)
         {
             _socket = socket;
-            _prox = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings(address, 100000));
+#if (NANOFRAMEWORK_1_0)
+            _prox = I2cDevice.Create(new I2cConnectionSettings(socket.I2cBus, address, I2cBusSpeed.StandardMode));
+#else
+			_prox = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings(address, 100000));
+#endif
 
             if (ChipRevision.Major == 0x10 & ChipRevision.Minor == 0x58)
             {
@@ -295,7 +304,7 @@ namespace MBN.Modules
 
         private void WriteInteger(Byte register, Int16 value)
         {
-            _conv = BitConverter.GetBytes(value);
+            _conv = System.BitConverter.GetBytes(value); //TODO: requires "System" as "MBN"  overrides it!
             _prox.Write(new Byte[] { register, _conv[0], _conv[1] });
         }
         #endregion

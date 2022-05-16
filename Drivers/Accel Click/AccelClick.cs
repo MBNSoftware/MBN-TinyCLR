@@ -28,9 +28,14 @@ The views and conclusions contained in the software and documentation are those 
 authors and should not be interpreted as representing official policies, either expressed
 or implied, of Robert Heffernan.
 */
-
+#if (NANOFRAMEWORK_1_0)
+using System.Device.Gpio;
+using System.Device.I2c;
+#else
 using GHIElectronics.TinyCLR.Devices.Gpio;
 using GHIElectronics.TinyCLR.Devices.I2c;
+#endif
+
 using System;
 using System.Threading;
 
@@ -261,12 +266,20 @@ namespace MBN.Modules
         {
             _socket = socket;
             // Create the driver's I²C configuration
+#if (NANOFRAMEWORK_1_0)
+            _accel = I2cDevice.Create(new I2cConnectionSettings(socket.I2cBus, address, I2cBusSpeed.StandardMode));
+#else
             _accel = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings(address, 100000));
+#endif
 
             if (ReadRegister((Byte)RegisterMap.DEVID) != 0xE5) { throw new SystemException("ADXL345 not detected"); }
 
+#if (NANOFRAMEWORK_1_0)
+            intPin = new GpioController().OpenPin(socket.Int, PinMode.Input);
+#else
             intPin = GpioController.GetDefault().OpenPin(socket.Int);
             intPin.SetDriveMode(GpioPinDriveMode.Input);
+#endif
             
             // Initialize our sensor
             InitSensor(autoStart);
@@ -702,8 +715,13 @@ namespace MBN.Modules
         /// A private callback function called when there is an interrupt generated from the sensor
         /// </summary>
         //private void ADXL345_Interrupt_OnInterrupt(uint data1, uint data2, DateTime time)
+#if (NANOFRAMEWORK_1_0)
+        private void ADXL345_Interrupt_OnInterrupt(Object sender, PinValueChangedEventArgs e)
+        {
+#else
         private void ADXL345_Interrupt_OnInterrupt(Object sender, GpioPinValueChangedEventArgs e)
         {
+#endif
             // Read the interrupt source register to see what caused the event
             var source = (InterruptSource) ReadRegister(RegisterMap.INT_SOURCE);
 

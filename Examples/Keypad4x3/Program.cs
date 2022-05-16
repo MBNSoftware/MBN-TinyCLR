@@ -1,5 +1,11 @@
-﻿using GHIElectronics.TinyCLR.Devices.Gpio;
+﻿#if (NANOFRAMEWORK_1_0)
+using System.Device.Gpio;
+using nanoFramework.Stm32.Pins;
+#else
+using GHIElectronics.TinyCLR.Devices.Gpio;
 using GHIElectronics.TinyCLR.Pins;
+#endif
+
 using MBN;
 using MBN.Modules;
 using System.Diagnostics;

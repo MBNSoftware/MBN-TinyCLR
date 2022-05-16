@@ -1,5 +1,11 @@
-﻿using GHIElectronics.TinyCLR.Devices.Gpio;
+﻿#if (NANOFRAMEWORK_1_0)
+using System.Device.Gpio;
+using System.Device.Spi;
+#else
+using GHIElectronics.TinyCLR.Devices.Gpio;
 using GHIElectronics.TinyCLR.Devices.Spi;
+#endif
+
 using System;
 
 namespace MBN.Modules
@@ -39,6 +45,17 @@ namespace MBN.Modules
         {
             _socket = socket;
             // Initialize SPI
+#if (NANOFRAMEWORK_1_0)
+            _seg = SpiDevice.Create(new SpiConnectionSettings(socket.SpiBus, socket.Cs)
+            {
+                Mode = SpiMode.Mode3,
+                ClockFrequency = 2000000
+            });
+
+            _en = new GpioController().OpenPin(socket.PwmPin);
+            _en.SetPinMode(PinMode.Output);
+            _en.Write(initialState ? PinValue.High : PinValue.Low);
+#else
             _seg = SpiController.FromName(socket.SpiBus).GetDevice(new SpiConnectionSettings()
             {
                 ChipSelectType = SpiChipSelectType.Gpio,
@@ -50,6 +67,7 @@ namespace MBN.Modules
             _en = GpioController.GetDefault().OpenPin(socket.PwmPin);
             _en.SetDriveMode(GpioPinDriveMode.Output);
             _en.Write(initialState ? GpioPinValue.High : GpioPinValue.Low);
+#endif
         }
 
         /// <summary>
@@ -62,7 +80,11 @@ namespace MBN.Modules
         {
             set
             {
+#if (NANOFRAMEWORK_1_0)
+                _en.Write(value ? PinValue.High : PinValue.Low);
+#else
                 _en.Write(value ? GpioPinValue.High : GpioPinValue.Low);
+#endif
             }
         }
 

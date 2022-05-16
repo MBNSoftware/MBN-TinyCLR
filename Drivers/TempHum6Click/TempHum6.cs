@@ -11,7 +11,11 @@
  * 
  */
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.I2c;
+#else
 using GHIElectronics.TinyCLR.Devices.I2c;
+#endif
 
 using System;
 using System.Threading;
@@ -84,7 +88,11 @@ namespace MBN.Modules
         public TempHum6Click(Hardware.Socket socket)
         {
             _socket = socket;
-            _sensor = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings(0x43, 100000));
+#if (NANOFRAMEWORK_1_0)
+            _sensor = I2cDevice.Create(new I2cConnectionSettings(socket.I2cBus, 0x43, I2cBusSpeed.StandardMode));
+#else
+			_sensor = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings(0x43, 100000));
+#endif
 
             // Reset device
             Reset(ResetModes.Soft);
@@ -92,10 +100,10 @@ namespace MBN.Modules
             // Deactivate Low Power to be able to read the PartID and UID registers.
             PowerMode = PowerModes.On;
 
-            PartID = BitConverter.ToUInt16(ReadRegister(ENS210_REG_PART_ID, 2), 0);
+            PartID = System.BitConverter.ToUInt16(ReadRegister(ENS210_REG_PART_ID, 2), 0);
 
             if (PartID != 0x210) throw new DeviceInitialisationException("TempHum6 Click not found on I2C Bus.");
-            UniqueID = BitConverter.ToInt64(ReadRegister(ENS210_REG_UID, 8), 0);
+            UniqueID = System.BitConverter.ToInt64(ReadRegister(ENS210_REG_UID, 8), 0);
 
             ConfigureSensor(new SensorConfiguration(
                 true,

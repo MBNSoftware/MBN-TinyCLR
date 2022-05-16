@@ -12,10 +12,15 @@
  * either express or implied. See the License for the specific language governing permissions and limitations under the License..
  */
 
+#if (NANOFRAMEWORK_1_0)
+using Windows.Devices.Pwm;
+#else
+using GHIElectronics.TinyCLR.Devices.Pwm;
+#endif
+
 using System;
 using System.Threading;
 using System.Collections;
-using GHIElectronics.TinyCLR.Devices.Pwm;
 
 namespace MBN.Modules
 {
@@ -49,8 +54,12 @@ namespace MBN.Modules
     /// </example>
     public sealed class BuzzerClick
     {
-        // PWM channel for alternating the pulse at given frequencies.
-        private readonly PwmChannel _buzzPwm;
+		// PWM channel for alternating the pulse at given frequencies.
+#if (NANOFRAMEWORK_1_0)
+		private readonly PwmPin _buzzPwm;
+#else
+		private readonly PwmChannel _buzzPwm;
+#endif
 		private readonly PwmController PWM;
 		private Melody _playList;
 		private Boolean _running;
@@ -65,10 +74,17 @@ namespace MBN.Modules
 		public BuzzerClick(Hardware.Socket socket)
 		{
 			// Initialize PWM and set initial brightness
+#if (NANOFRAMEWORK_1_0)
+			PWM = PwmController.FromId(socket.PwmController);
+			PWM.SetDesiredFrequency(5000);
+			_buzzPwm = PWM.OpenPin(socket.PwmPin);
+			_buzzPwm.SetActiveDutyCyclePercentage(0.0);
+#else
 			PWM = PwmController.FromName(socket.PwmController);
 			PWM.SetDesiredFrequency(10000);
 			_buzzPwm = PWM.OpenChannel(socket.PwmChannel);
 			_buzzPwm.SetActiveDutyCyclePercentage(0.0);
+#endif
 			_buzzPwm.Start();
 
 			_playList = new Melody();
@@ -190,7 +206,7 @@ namespace MBN.Modules
 			/// </summary>
 			public static readonly Tone Rest = new Tone(0.0);
 
-			#region 4th Octave
+#region 4th Octave
 			/// <summary>
 			/// C in the 4th octave. Middle C.
 			/// </summary>
@@ -226,16 +242,16 @@ namespace MBN.Modules
 			/// </summary>
 			public static readonly Tone B4 = new Tone(493.883);
 
-			#endregion 4th Octave
+#endregion 4th Octave
 
-			#region 5th Octave
+#region 5th Octave
 
 			/// <summary>
 			/// C in the 5th octave.
 			/// </summary>
 			public static readonly Tone C5 = new Tone(523.251);
 
-			#endregion 5th Octave
+#endregion 5th Octave
 		}
 
 		/// <summary>

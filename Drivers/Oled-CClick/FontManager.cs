@@ -12,7 +12,11 @@
  */
 
 using System;
+#if (NANOFRAMEWORK_1_0)
+using System.Resources;
+#else
 using MBN.Modules.Properties;
+#endif
 
 namespace MBN.Modules
 {
@@ -21,7 +25,7 @@ namespace MBN.Modules
 	/// </summary>
 	public static class FontManager
 	{
-		#region ENUMS
+#region ENUMS
 
 		/// <summary>
 		/// A set of predefined Fonts of varying sizes (8-24 points).
@@ -29,30 +33,65 @@ namespace MBN.Modules
 		public enum FontName
 		{
 			/// <summary>
+			/// Tahoma 6 point without Extended ASCII Characters
+			/// </summary>
+			TahomaReg6,
+
+			/// <summary>
 			/// Tahoma 7 point without Extended ASCII Characters
 			/// </summary>
 			TahomaReg7,
 
 			/// <summary>
-			/// Tahoma 7 point with Extended ASCII Characters
+			/// Tahoma 8 point without Extended ASCII Characters
 			/// </summary>
-			TahomaExt7,
+			TahomaReg8,
 
 			/// <summary>
-			/// Tahoma 12 point without Extended ASCII Characters
+			/// Tahoma 10 point without Extended ASCII Characters
 			/// </summary>
-			TahomaReg12,
+			TahomaReg10,
 
 			/// <summary>
-			/// Tahoma 12 point with Extended ASCII Characters
+			/// Tahoma 14 point without Extended ASCII Characters
 			/// </summary>
-			TahomaExt12
+			TahomaReg14,
+
+			/// <summary>
+			/// Tahoma 16 point without Extended ASCII Characters
+			/// </summary>
+			TahomaReg16,
+
+			/// <summary>
+			/// Tahoma 18 point without Extended ASCII Characters
+			/// </summary>
+			TahomaReg18,
+
+			/// <summary>
+			/// Roboto Mono 11x23 without Extended ASCII Characters
+			/// </summary>
+			RobotoMono11x23,
+
+			/// <summary>
+			/// Exo 2 Condensed 10x16 without Extended ASCII Characters
+			/// </summary>
+			Exo2Condensed10x16,
+
+			/// <summary>
+			/// Exo 2 Condensed 15x23 without Extended ASCII Characters
+			/// </summary>
+			Exo2Condensed15x23,
+
+			/// <summary>
+			/// Exo 2 Condensed 21x32 without Extended ASCII Characters
+			/// </summary>
+			Exo2Condensed21x32
 
 		}
 
-		#endregion
+#endregion
 
-		#region Public Methods
+#region Public Methods
 
 		/// <summary>
 		/// Returns a MikroFont resource specified by a predefined font.
@@ -71,20 +110,38 @@ namespace MBN.Modules
 		{
 			switch (font)
 			{
+				case FontName.TahomaReg6:
+					return new MikroFont(MikroFontFiles.guiFont_Tahoma_6_Regular);
 				case FontName.TahomaReg7:
-					return new MikroFont(Resources.GetBytes(Resources.BinaryResources.tahoma_7));
-				case FontName.TahomaExt7:
-					return new MikroFont(Resources.GetBytes(Resources.BinaryResources.tahoma_7e));
-				case FontName.TahomaReg12:
-					return new MikroFont(Resources.GetBytes(Resources.BinaryResources.tahoma_12));
-				case FontName.TahomaExt12:
-					return new MikroFont(Resources.GetBytes(Resources.BinaryResources.tahoma_12e));
+					return new MikroFont(MikroFontFiles.guiFont_Tahoma_7_Regular);
+				case FontName.TahomaReg8:
+					return new MikroFont(MikroFontFiles.guiFont_Tahoma_8_Regular);
+				case FontName.TahomaReg10:
+					return new MikroFont(MikroFontFiles.guiFont_Tahoma_10_Regular);
+				case FontName.TahomaReg14:
+					return new MikroFont(MikroFontFiles.guiFont_Tahoma_14_Regular);
+				case FontName.TahomaReg16:
+					return new MikroFont(MikroFontFiles.guiFont_Tahoma_16_Regular);
+				case FontName.TahomaReg18:
+					return new MikroFont(MikroFontFiles.guiFont_Tahoma_18_Regular);
+				case FontName.RobotoMono11x23:
+					return new MikroFont(MikroFontFiles.guiFont_Roboto_Mono11x23_Regular);
+				case FontName.Exo2Condensed10x16:
+					return new MikroFont(MikroFontFiles.guiFont_Exo_2_Condensed10x16_Regular);
+				case FontName.Exo2Condensed15x23:
+					return new MikroFont(MikroFontFiles.guiFont_Exo_2_Condensed15x23_Regular);
+				case FontName.Exo2Condensed21x32:
+					return new MikroFont(MikroFontFiles.guiFont_Exo_2_Condensed21x32_Regular);
 				default:
 					throw new ArgumentException("No such font exists.");
 			}
 		}
+		// https://github.com/MBNSoftware/NETMF44/tree/f7d3203db1932b853143bc78412529dd18528296/Drivers/OledCClick
+		// https://www.mikroe.com/glcd-font-creator
+		// https://github.com/MikroElektronika/OLED_C_click/blob/master/example/c/ARM/STM/fonts.h
+		// https://github.com/MikroElektronika/OLED_C_click/blob/master/example/basic/PIC32/fonts.mbas
 
-		#endregion
+#endregion
 	}
 }
 

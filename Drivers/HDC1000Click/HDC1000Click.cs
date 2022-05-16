@@ -4,15 +4,20 @@
  * Version 1.0 :
  *  - Initial revision coded by Stephen Cardinale
  *  
- * Copyright © 2020 Stephen Cardinale and MikroBUS.Net
+ * Copyright ï¿½ 2020 Stephen Cardinale and MikroBUS.Net
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.Gpio;
+using System.Device.I2c;
+#else
 using GHIElectronics.TinyCLR.Devices.Gpio;
 using GHIElectronics.TinyCLR.Devices.I2c;
+#endif
 
 using System;
 using System.Threading;
@@ -56,7 +61,7 @@ namespace MBN.Modules
     ///                 float humidity;
     ///
     ///                 _tempHumidity.ReadSensor(out temperature, out humidity);
-    ///                 Debug.Print("Temperature - " + _tempHumidity.ReadTemperature().ToString("F2") + " °C");
+    ///                 Debug.Print("Temperature - " + _tempHumidity.ReadTemperature().ToString("F2") + " ï¿½C");
     ///                 Debug.Print("Humidity - " + humidity.ToString("F2") + " %RH");
     ///
     ///                 /* For independent measurement mode use the following code to obtain temperature and humidity data */
@@ -82,11 +87,18 @@ namespace MBN.Modules
         public Hdc1000Click(Hardware.Socket socket, I2CAddress ic2Address = I2CAddress.I2CAddressOne)
         {
             _socket = socket;
+#if (NANOFRAMEWORK_1_0)
+            _sensor = I2cDevice.Create(new I2cConnectionSettings(socket.I2cBus, (int)ic2Address, I2cBusSpeed.StandardMode));
+            _dataReady = new GpioController().OpenPin(socket.Int);
+            _dataReady.SetPinMode(PinMode.InputPullUp);
+            //_dataReady.ValueChangedEdge = PinEventTypes.Falling;
+#else
             _sensor = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings((Int32)ic2Address, 100000));
-
             _dataReady = GpioController.GetDefault().OpenPin(socket.Int);
             _dataReady.SetDriveMode(GpioPinDriveMode.InputPullUp);
             _dataReady.ValueChangedEdge = GpioPinEdge.FallingEdge;
+#endif
+
             _dataReady.ValueChanged += DataReady_ValueChanged;
 
             if (GetManufacturerId() != 0x5449 && GetDeviceId() != 0x1000) throw new DeviceInitialisationException("HDC1000 click not found on I2C Bus");
@@ -224,9 +236,15 @@ namespace MBN.Modules
 
         #region Private Methods
 
+#if (NANOFRAMEWORK_1_0)
+        private void DataReady_ValueChanged(object sender, PinValueChangedEventArgs e)
+        {
+            if (e.ChangeType == PinEventTypes.Falling)
+#else
         private void DataReady_ValueChanged(GpioPin sender, GpioPinValueChangedEventArgs e)
         {
             if (e.Edge== GpioPinEdge.FallingEdge)
+#endif
             {
                 _dataAvailable = true;
             }
@@ -303,9 +321,9 @@ namespace MBN.Modules
             }
         }
 
-        #endregion
+#endregion
 
-        #region Public Properties
+#region Public Properties
 
         /// <summary>
         /// Returns the raw data as read from the HDC1000 Click.
@@ -329,9 +347,9 @@ namespace MBN.Modules
         /// </example>
         public TemperatureUnits TemperatureUnit { get; set; } = TemperatureUnits.Celsius;
 
-        #endregion
+#endregion
 
-        #region Public Methods
+#region Public Methods
 
         /// <summary>
         /// Configures the HDC1000 Click for temperature, humidity acquisition.
@@ -413,7 +431,7 @@ namespace MBN.Modules
             snValue[1] = readBuffer2[0];
             snValue[0] = readBuffer3[1];
 
-            return BitConverter.ToUInt32(snValue, 0);
+            return System.BitConverter.ToUInt32(snValue, 0); //TODO: requires "System" as "MBN"  overrides it!
         }
 
         /// <summary>
@@ -453,7 +471,7 @@ namespace MBN.Modules
         /// float temperature;
         /// float humidity;
         /// tempHumidity.ReadSensor(out temperature, out humidity);
-        /// Debug.Print("Temperature - " + _tempHumidity.ReadTemperature().ToString("F2") + " °C");
+        /// Debug.Print("Temperature - " + _tempHumidity.ReadTemperature().ToString("F2") + " ï¿½C");
         /// Debug.Print("Humidity - " + humidity.ToString("F2") + " %RH");
         /// </code>
         /// </example>
@@ -481,7 +499,7 @@ namespace MBN.Modules
         /// Reads the temperature from the HDC1000 Click.
         /// </summary>
         /// <param name="source">The <see cref="TemperatureSources"/> to read the Temperature from.</param>
-        /// <returns>The temperature measured in °C.</returns>
+        /// <returns>The temperature measured in ï¿½C.</returns>
         /// <exception cref="InvalidOperationException"> an InvalidOperationException will be thrown if attempting to read <see cref="TemperatureSources.Object"/> as this module does not support object measurement.</exception>
         /// <example>Example usage:
         /// <code language = "C#">
@@ -524,6 +542,6 @@ namespace MBN.Modules
             return ReadRegister(ConfigRegister)[0] == 0x10;
         }
 
-        #endregion
+#endregion
     }
 }

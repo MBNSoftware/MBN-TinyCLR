@@ -18,9 +18,14 @@
 
 #region Usings
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.I2c;
+#else
+using GHIElectronics.TinyCLR.Devices.I2c;
+#endif
+
 using System;
 using System.Threading;
-using GHIElectronics.TinyCLR.Devices.I2c;
 
 #endregion
 
@@ -89,7 +94,11 @@ namespace MBN.Modules
         public TempHum7Click(Hardware.Socket socket)
         {
             _socket = socket;
-            _sensor = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings(0x40, 400000));
+#if (NANOFRAMEWORK_1_0)
+            _sensor = I2cDevice.Create(new I2cConnectionSettings(socket.I2cBus, 0x40, I2cBusSpeed.FastMode));
+#else
+			_sensor = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings(0x40, 400000));
+#endif
 
             Thread.Sleep(50); // Time from VDD >= 1.64V until ready for a full conversion.
 

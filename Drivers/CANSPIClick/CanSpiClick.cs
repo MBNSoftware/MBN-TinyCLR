@@ -12,8 +12,14 @@
  * 
  */
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.Gpio;
+using System.Device.Spi;
+#else
 using GHIElectronics.TinyCLR.Devices.Gpio;
 using GHIElectronics.TinyCLR.Devices.Spi;
+#endif
+
 using System;
 using System.Threading;
 
@@ -60,11 +66,14 @@ namespace MBN.Modules
         const Byte regRXB1DLC = 0x75;
         const Byte regRXB1D0 = 0x76;
 
-        public const Byte normalMode = 0;
-        public const Byte sleepMode = 1;
-        public const Byte loopbackMode = 2;
-        public const Byte listenonlyMode = 3;
-        public const Byte configMode = 4;
+        public enum Mode : byte
+        {
+            NormalMode = 0x00,
+            SleepMode = 0x01,
+            LoopbackMode = 0x02,
+            ListenonlyMode = 0x03,
+            ConfigMode = 0x04
+        }
 
         public struct Config
         {
@@ -100,7 +109,20 @@ namespace MBN.Modules
         public CanSpiClick(Hardware.Socket socket)
         {
             _socket = socket;
+
             // Initialize SPI
+#if (NANOFRAMEWORK_1_0)
+            _canSpi = SpiDevice.Create(new SpiConnectionSettings(socket.SpiBus, socket.Cs)
+            {
+                Mode = SpiMode.Mode3,
+                ClockFrequency = 2000000
+            });
+
+            _rst = new GpioController().OpenPin(socket.Rst, PinMode.Output);
+            _rst.Write(PinValue.High);
+
+            _int = new GpioController().OpenPin(socket.Int, PinMode.Input);
+#else
             _canSpi = SpiController.FromName(socket.SpiBus).GetDevice(new SpiConnectionSettings()
             {
                 ChipSelectType = SpiChipSelectType.Gpio,
@@ -116,6 +138,8 @@ namespace MBN.Modules
             _int = GpioController.GetDefault().OpenPin(socket.Int);
             _int.SetDriveMode(GpioPinDriveMode.Input);
             _int.ValueChangedEdge = GpioPinEdge.FallingEdge;
+            
+#endif
             _int.ValueChanged += INT_ValueChanged;
 
             if (!Reset(ResetModes.Hard))
@@ -127,8 +151,16 @@ namespace MBN.Modules
         /// uses the rollover feature from MAB to RXB1, when RXB0 is full
         /// Note: Only standard identifier, no RTR frame detection
         /// </summary>
-        private void INT_ValueChanged(GpioPin sender, GpioPinValueChangedEventArgs e)
+#if (NANOFRAMEWORK_1_0)
+        private void INT_ValueChanged(object sender, PinValueChangedEventArgs e)
         {
+            if (e.ChangeType == PinEventTypes.Falling)
+            {
+#else
+        private void INT_ValueChanged(GpioPin sender, GpioPinValueChangedEventArgs e)
+                {
+#endif
+
             var readCmd = (ReadReg(regCANINTF) & 0x01) == 0x01 ? cmdReadRXB0 : cmdReadRXB1;
 
             lock (_socket.LockSpi)
@@ -139,7 +171,11 @@ namespace MBN.Modules
 
             var Msg = new CanMessage()
             {
+#if (NANOFRAMEWORK_1_0)
+                Timestamp = DateTime.UtcNow, //TODO: this is not equal!
+#else
                 Timestamp = e.Timestamp,
+#endif
                 ArbitrationId = valueChangedBuffer[0] << 3 | valueChangedBuffer[1] >> 5,
                 IsExtendedId = false,
                 IsRemoteTransmissionRequest = false,
@@ -152,7 +188,10 @@ namespace MBN.Modules
 
             MessageReceivedEventHandler messageReceived = MessageReceived;
             messageReceived(this, new MessageReceivedEventArgs(Msg));
+#if (NANOFRAMEWORK_1_0)
         }
+#endif
+    }
 
         /// <summary>
         /// Gets or sets the name of the Can node.
@@ -172,7 +211,7 @@ namespace MBN.Modules
         /// <param name="baudrate">Speed of CAN bus (predefined Baudrate100k, Baudrate125k, Baudrate250k, Baudrate500k)</param>
         /// <param name="opmode">Operation mode of MCP2515 (5 different modes, normalMode=0)</param>
         /// <returns>True, when OpMode is correvtly set</returns>
-        public Boolean Init(String name, Config baudrate, Byte opmode)
+        public Boolean Init(String name, Config baudrate, Mode opmode)
         {
             Name = name;
 
@@ -228,9 +267,15 @@ namespace MBN.Modules
             switch (resetMode)
             {
                 case ResetModes.Hard:
+#if (NANOFRAMEWORK_1_0)
+                    _rst.Write(PinValue.Low);
+                    Thread.Sleep(10);
+                    _rst.Write(PinValue.High);
+#else
                     _rst.Write(GpioPinValue.Low);
                     Thread.Sleep(10);
                     _rst.Write(GpioPinValue.High);
+#endif
                     break;
                 case ResetModes.Soft:
                     lock (_socket.LockSpi)
@@ -240,7 +285,7 @@ namespace MBN.Modules
                     Thread.Sleep(10);
                     break;
             }
-            return (ReadReg(regCANSTAT) >> 5) == configMode;
+            return (ReadReg(regCANSTAT) >> 5) == (int)Mode.ConfigMode;
         }
 
         /// <summary>
@@ -275,13 +320,13 @@ namespace MBN.Modules
             }
         }
 
-        public Boolean SetOpMode(Byte opmode)
+        public Boolean SetOpMode(Mode opmode)
         {
             lock (_socket.LockSpi)
             {
-                _canSpi.Write(new Byte[] { cmdBitModify, regCANCTRL, 0xE0, (Byte)(opmode << 5) });
+                _canSpi.Write(new Byte[] { cmdBitModify, regCANCTRL, 0xE0, (byte)((byte)opmode << 5) });
             }
-            return (ReadReg(regCANSTAT) >> 5) == opmode;
+            return (ReadReg(regCANSTAT) >> 5) == (byte)opmode;
         }
 
         /// <summary>

@@ -11,8 +11,14 @@
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.Gpio;
+using System.Device.Spi;
+#else
 using GHIElectronics.TinyCLR.Devices.Gpio;
 using GHIElectronics.TinyCLR.Devices.Spi;
+#endif
+
 using System;
 using System.Threading;
 
@@ -217,11 +223,18 @@ namespace MBN.Modules
         public ThunderClick(Hardware.Socket socket)
         {
             _socket = socket;
-            IRQ = GpioController.GetDefault().OpenPin(socket.Int);
-            IRQ.SetDriveMode(GpioPinDriveMode.Input);
-            IRQ.ValueChanged += IRQ_ValueChanged;
 
             // Initialize SPI
+#if (NANOFRAMEWORK_1_0)
+            _thunder = SpiDevice.Create(new SpiConnectionSettings(socket.SpiBus, socket.Cs)
+            {
+                Mode = SpiMode.Mode0,
+                ClockFrequency = 2000000
+            });
+
+            IRQ = new GpioController().OpenPin(socket.Int);
+            IRQ.SetPinMode(PinMode.Input);
+#else
             _thunder = SpiController.FromName(socket.SpiBus).GetDevice(new SpiConnectionSettings()
             {
                 ChipSelectType = SpiChipSelectType.Gpio,
@@ -229,6 +242,12 @@ namespace MBN.Modules
                 Mode = SpiMode.Mode0,
                 ClockFrequency = 2000000
             });
+
+            IRQ = GpioController.GetDefault().OpenPin(socket.Int);
+            IRQ.SetDriveMode(GpioPinDriveMode.Input);
+#endif
+
+            IRQ.ValueChanged += IRQ_ValueChanged;
 
             // Direct commands
             lock (_socket.LockSpi)
@@ -245,7 +264,11 @@ namespace MBN.Modules
             _powerMode = PowerModes.On;
         }
 
+#if (NANOFRAMEWORK_1_0)
+        private void IRQ_ValueChanged(object sender, PinValueChangedEventArgs e) => Check();
+#else
         private void IRQ_ValueChanged(GpioPin sender, GpioPinValueChangedEventArgs e) => Check();
+#endif
 
         /// <summary>
         /// Starts the interrupt pin scanning

@@ -11,8 +11,12 @@
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
+#if (NANOFRAMEWORK_1_0)
+namespace nanoFramework.Presentation.Media
+#else
 // ReSharper disable once CheckNamespace
 namespace Microsoft.SPOT.Presentation.Media
+#endif
 {
 	/// <summary>
 	/// A class providing the RGB 565 equivalent of the RGB 888 KnownColors commonly used in the .Net Framework

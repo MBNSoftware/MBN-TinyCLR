@@ -11,8 +11,15 @@
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.Spi;
+using Windows.Devices.Pwm;
+#else
+using GHIElectronics.TinyCLR.Devices.Gpio;
 using GHIElectronics.TinyCLR.Devices.Spi;
 using GHIElectronics.TinyCLR.Devices.Pwm;
+#endif
+
 using System;
 
 namespace MBN.Modules
@@ -24,11 +31,15 @@ namespace MBN.Modules
     public sealed class SevenSegClick
     {
         private static SpiDevice _sevenSeg;
+#if (NANOFRAMEWORK_1_0)
+        private static PwmPin _pwm;
+#else
         private static PwmChannel _pwm;
+#endif
         private Double _pwmLevel;                            // Brightness level
         private readonly Hardware.Socket _socket;
 
-        #region CharTable
+#region CharTable
         /// <summary>
         /// Contains binary values for digits and chars
         /// </summary>
@@ -86,7 +97,7 @@ namespace MBN.Modules
             0x00, // '^'
             0x10  // '_'
         };
-        #endregion
+#endregion
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SevenSegClick"/> class.
@@ -96,18 +107,32 @@ namespace MBN.Modules
         public SevenSegClick(Hardware.Socket socket, Double initialBrightness = 1.0)
         {
             _socket = socket;
-            _sevenSeg = SpiController.FromName(socket.SpiBus).GetDevice(new SpiConnectionSettings()
+#if (NANOFRAMEWORK_1_0)
+            _sevenSeg = SpiDevice.Create(new SpiConnectionSettings(socket.SpiBus, socket.Cs)
             {
-                ChipSelectType = SpiChipSelectType.Gpio,
-                ChipSelectLine = GHIElectronics.TinyCLR.Devices.Gpio.GpioController.GetDefault().OpenPin(socket.Cs),
                 Mode = SpiMode.Mode0,
                 ClockFrequency = 2000000
             });
+#else
+            _sevenSeg = SpiController.FromName(socket.SpiBus).GetDevice(new SpiConnectionSettings()
+            {
+                ChipSelectType = SpiChipSelectType.Gpio,
+                ChipSelectLine = GpioController.GetDefault().OpenPin(socket.Cs),
+                Mode = SpiMode.Mode0,
+                ClockFrequency = 2000000
+            });
+#endif
 
             // Sets initial brightness
+#if (NANOFRAMEWORK_1_0)
+            var PWM = PwmController.GetDefault();
+            PWM.SetDesiredFrequency(5000);
+            _pwm = PWM.OpenPin(socket.PwmChannel);
+#else
             var PWM = PwmController.FromName(socket.PwmController);
             PWM.SetDesiredFrequency(5000);
             _pwm = PWM.OpenChannel(socket.PwmChannel);
+#endif
             Brightness = initialBrightness;
         }
 

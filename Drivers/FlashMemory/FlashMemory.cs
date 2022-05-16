@@ -11,8 +11,14 @@
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.Gpio;
+using System.Device.Spi;
+#else
 using GHIElectronics.TinyCLR.Devices.Gpio;
 using GHIElectronics.TinyCLR.Devices.Spi;
+#endif
+
 using System;
 using System.Threading;
 
@@ -67,6 +73,25 @@ namespace MBN.Modules
         public FlashMemory(Hardware.Socket socket, Boolean detectParameters = true, Int32 hold = -1, Int32 wp = -1)
         {
             _socket = socket;
+#if (NANOFRAMEWORK_1_0)
+            _flash = SpiDevice.Create(new SpiConnectionSettings(socket.SpiBus, socket.Cs)
+            {
+                Mode = SpiMode.Mode0,
+                ClockFrequency = 10000000
+            });
+
+            if (wp != -1)
+            {
+                GpioPin _wp = new GpioController().OpenPin(wp, PinMode.Output);
+                _wp.Write(PinValue.High);
+            }
+
+            if (hold != -1)
+            {
+                GpioPin _hold = new GpioController().OpenPin(hold, PinMode.Output);
+                _hold.Write(PinValue.High);
+            }
+#else
             _flash = SpiController.FromName(socket.SpiBus).GetDevice(new SpiConnectionSettings()
             {
                 ChipSelectType = SpiChipSelectType.Gpio,
@@ -88,6 +113,8 @@ namespace MBN.Modules
                 _hold.SetDriveMode(GpioPinDriveMode.Output);
                 _hold.Write(GpioPinValue.High);
             }
+#endif
+
             if (detectParameters) DetectParameters();
         }
 
@@ -137,7 +164,11 @@ namespace MBN.Modules
         public override void EraseBlock(Int32 block, Int32 count)
         {
             if ((block + count) * BlockSize > Capacity) throw new ArgumentException("Invalid block + count");
+#if (NANOFRAMEWORK_1_0)
+            if (LedIndicator != null) LedIndicator.Write(PinValue.High);
+#else
             if (LedIndicator != null) LedIndicator.Write(GpioPinValue.High);
+#endif
 
             var data4 = new Byte[4];
             var address = block * BlockSize;
@@ -156,7 +187,11 @@ namespace MBN.Modules
                 while (WriteInProgress()) { }
                 address += BlockSize;
             }
+#if (NANOFRAMEWORK_1_0)
+            if (LedIndicator != null) LedIndicator.Write(PinValue.Low);
+#else
             if (LedIndicator != null) LedIndicator.Write(GpioPinValue.Low);
+#endif
         }
 
         /// <summary>
@@ -179,14 +214,22 @@ namespace MBN.Modules
         /// </example>
         public override void EraseChip()
         {
+#if (NANOFRAMEWORK_1_0)
+            if (LedIndicator != null) LedIndicator.Write(PinValue.High);
+#else
             if (LedIndicator != null) LedIndicator.Write(GpioPinValue.High);
+#endif
             while (!WriteEnabled()) { }
             lock (_socket.LockSpi)
             {
                 _flash.Write(new Byte[] { 0xC7 });
             }
             while (WriteInProgress()) { Thread.Sleep(20); }
+#if (NANOFRAMEWORK_1_0)
+            if (LedIndicator != null) LedIndicator.Write(PinValue.Low);
+#else
             if (LedIndicator != null) LedIndicator.Write(GpioPinValue.Low);
+#endif
         }
 
         /// <summary>
@@ -210,7 +253,11 @@ namespace MBN.Modules
         public override void EraseSector(Int32 sector, Int32 count)
         {
             if ((sector + count) * SectorSize > Capacity) throw new ArgumentException("Invalid sector + count");
+#if (NANOFRAMEWORK_1_0)
+            if (LedIndicator != null) LedIndicator.Write(PinValue.High);
+#else
             if (LedIndicator != null) LedIndicator.Write(GpioPinValue.High);
+#endif
 
             var data4 = new Byte[4];
             var address = sector * SectorSize;
@@ -229,7 +276,12 @@ namespace MBN.Modules
                 while (WriteInProgress()) { }
                 address += SectorSize;
             }
+
+#if (NANOFRAMEWORK_1_0)
+            if (LedIndicator != null) LedIndicator.Write(PinValue.Low);
+#else
             if (LedIndicator != null) LedIndicator.Write(GpioPinValue.Low);
+#endif
         }
 
         /// <summary>
@@ -246,7 +298,11 @@ namespace MBN.Modules
         /// </exception>
         public override void ReadData(Int32 address, Byte[] data, Int32 index, Int32 count)
         {
+#if (NANOFRAMEWORK_1_0)
+            if (LedIndicator != null) LedIndicator.Write(PinValue.High);
+#else
             if (LedIndicator != null) LedIndicator.Write(GpioPinValue.High);
+#endif
 
             var data4 = new Byte[4 + data.Length];
             data4[0] = 0x03;
@@ -262,7 +318,11 @@ namespace MBN.Modules
             while (WriteInProgress()) { }
             Array.Copy(data4, 4, data, index, count);
 
+#if (NANOFRAMEWORK_1_0)
+            if (LedIndicator != null) LedIndicator.Write(PinValue.Low);
+#else
             if (LedIndicator != null) LedIndicator.Write(GpioPinValue.Low);
+#endif
         }
 
         /// <summary>
@@ -293,7 +353,11 @@ namespace MBN.Modules
         /// </exception>
         public override void WriteData(Int32 address, Byte[] data, Int32 index, Int32 count)
         {
+#if (NANOFRAMEWORK_1_0)
+            if (LedIndicator != null) LedIndicator.Write(PinValue.High);
+#else
             if (LedIndicator != null) LedIndicator.Write(GpioPinValue.High);
+#endif
 
             var len = _PageSize - (address & 0xFF); // remaining of first page
             while (count > 0)
@@ -317,7 +381,11 @@ namespace MBN.Modules
                 len = _PageSize;
             }
 
+#if (NANOFRAMEWORK_1_0)
+            if (LedIndicator != null) LedIndicator.Write(PinValue.Low);
+#else
             if (LedIndicator != null) LedIndicator.Write(GpioPinValue.Low);
+#endif
         }
 
         /// <summary>
@@ -325,7 +393,11 @@ namespace MBN.Modules
         /// </summary>
         public void DetectParameters()
         {
+#if (NANOFRAMEWORK_1_0)
+            if (LedIndicator != null) LedIndicator.Write(PinValue.High);
+#else
             if (LedIndicator != null) LedIndicator.Write(GpioPinValue.High);
+#endif
 
             var sfdp = new Byte[165];
             while (!WriteEnabled()) { }
@@ -349,7 +421,11 @@ namespace MBN.Modules
                               (sfdp[Offset + 0x05] << 8) +
                                sfdp[Offset + 0x04]) >> 3) + 1;
             }
+#if (NANOFRAMEWORK_1_0)
+            if (LedIndicator != null) LedIndicator.Write(PinValue.Low);
+#else
             if (LedIndicator != null) LedIndicator.Write(GpioPinValue.Low);
+#endif
         }
     }
 }

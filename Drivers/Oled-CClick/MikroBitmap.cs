@@ -13,26 +13,35 @@
 
 using MBN.Modules;
 
+#if (NANOFRAMEWORK_1_0)
+using nanoFramework.Presentation.Media;
+using nanoFramework.UI;
+#else
+using System.Drawing;
 using Microsoft.SPOT.Presentation.Media;
+#endif
 
 using System;
-using System.Drawing;
 
+#if (NANOFRAMEWORK_1_0)
+namespace nanoFramework.Presentation
+#else
 namespace Microsoft.SPOT
+#endif
 {
     /// <summary>
     /// An abstract class with support for bitmaps of the BGR 565 Color format.
     /// </summary>
     public class MikroBitmap
 	{
-		#region Fields
+#region Fields
 
         private Rect _clippingRegion;
 		private Byte[] _pixels;
 
-		#endregion
+#endregion
 
-        #region Constructors
+#region Constructors
 
 		/// <summary>
 		/// Creates a new empty MikroBitmap object which you can use as a drawing surface.
@@ -112,9 +121,9 @@ namespace Microsoft.SPOT
             _clippingRegion = new Rect(0, 0, Width, Height);
         }
 
-        #endregion
+#endregion
 
-		#region Properties
+#region Properties
 
 		/// <summary>
 		/// Gets or Sets the clipping region of the drawing surface of the MikroBitmap object.
@@ -180,9 +189,9 @@ namespace Microsoft.SPOT
 		/// </example>
 		public Int32 Width { get; }
 
-        #endregion
+#endregion
 
-		#region Public Methods
+#region Public Methods
 
 		/// <summary>
 		/// Clears the MikroBitmap object turning all pixels to Black.
@@ -221,21 +230,30 @@ namespace Microsoft.SPOT
 			}
 		}
 
-		#endregion
+#endregion
 
 	}
 }
 
+#if (NANOFRAMEWORK_1_0)
+namespace nanoFramework.Presentation
+#else
 namespace Microsoft.SPOT
+#endif
 {
-    using Presentation.Media;
+    using nanoFramework.Presentation;
+#if (NANOFRAMEWORK_1_0)
+    using nanoFramework.Presentation.Media;
+#else
+	using Presentation.Media;
+#endif
 
     /// <summary>
     /// A class containing extension methods for the MikroBitmap object.
     /// </summary>
     public static class BitmapExtensions
 	{
-		#region RGB 888 Conversion Extensions
+#region RGB 888 Conversion Extensions
 
 		/// <summary>
 		/// Converts a RGB 888 Bitmap to a 565 MikroBitmap object.
@@ -269,10 +287,17 @@ namespace Microsoft.SPOT
 				{
 					for (Int32 x = 0; x <= bitmap.Width - 1; x++)
 					{
+#if (NANOFRAMEWORK_1_0)
+						Color pixel = bitmap.GetPixel(x, y);
+						UInt16 pixelOut = (UInt16)((ColorUtility.GetBValue(pixel) >> 3) | ((ColorUtility.GetGValue(pixel) & 0xFC) << 3) | ((ColorUtility.GetRValue(pixel) & 0xF8) << 8));
+						bOut[++byteCounter] = (Byte)(pixelOut >> 8);
+						bOut[++byteCounter] = (Byte)(pixelOut & 0xff);
+#else
 						Color pixel = bitmap.GetPixel(x, y);
                         UInt16 pixelOut = (UInt16) ((pixel.B >> 3) | ((pixel.G & 0xFC) << 3) | ((pixel.R & 0xF8) << 8));
 						bOut[++byteCounter] = (Byte)(pixelOut >> 8);
 						bOut[++byteCounter] = (Byte)(pixelOut & 0xff);
+#endif
 					}
 				}
 				return bOut;
@@ -283,9 +308,9 @@ namespace Microsoft.SPOT
 			}
 		}
 
-		#endregion
+#endregion
 
-		#region Image Extensions
+#region Image Extensions
 
 		/// <summary>
 		/// Renders a MikroBitmap object on the drawing surface of the canvas at the specified location.
@@ -393,9 +418,9 @@ namespace Microsoft.SPOT
 			DrawImage(canvas, tmpBitmap, x, y);
 		}
 
-		#endregion
+#endregion
 
-		#region Pixel Extensions
+#region Pixel Extensions
 
 		/// <summary>
 		/// Returns the <see cref="MikroColor"/> of the pixel on the drawing surface of the canvas at the specified location.
@@ -457,9 +482,9 @@ namespace Microsoft.SPOT
 			canvas.Pixels[l + 1] = (Byte)(color.Value & 0xff);
 		}
 
-		#endregion
+#endregion
 
-		#region Text Extensions
+#region Text Extensions
 
 		/// <summary>
 		/// Draws text with an transparent background on the drawing surface of the canvas at the specified location.
@@ -810,9 +835,9 @@ namespace Microsoft.SPOT
 			if (str != String.Empty) DrawText(canvas, str, font, textColor, rect.X, rect.Y + (center ? rect.Width / 2 - curW / 2 : 0));
 		}
 
-		#endregion
+#endregion
 
-		#region Lines Extensions
+#region Lines Extensions
 
 		/// <summary>
 		/// Draws a line to the drawing surface of the canvas at the specified coordinates.
@@ -880,9 +905,9 @@ namespace Microsoft.SPOT
 			}
 		}
 
-		#endregion
+#endregion
 
-		#region Rectangles Extensions
+#region Rectangles Extensions
 
 		/// <summary>
 		/// Draws a hollow Rectangle to the drawing surface of the canvas at the specified rectangle.
@@ -1145,9 +1170,9 @@ namespace Microsoft.SPOT
 			FillRectangle(canvas, fillcolor, rect.X, rect.Y, rect.Width, rect.Height);
 		}
 
-		#endregion
+#endregion
 
-		#region Ellipse Extensions
+#region Ellipse Extensions
 
 		/// <summary>
 		/// Renders a hollow ellipse on the MikroBitmap object at the specified location.
@@ -1450,9 +1475,9 @@ namespace Microsoft.SPOT
 			}
 		}
 
-		#endregion
+#endregion
 
-		#region Private Methods
+#region Private Methods
 
 		private static void Swap(ref Int32 a1, ref Int32 a2)
 		{
@@ -1632,7 +1657,7 @@ namespace Microsoft.SPOT
 			SetPixel(canvas, color, centerX - radiusX, centerY - radiusY);
 		}
 
-		#endregion
+#endregion
 
 	}
 

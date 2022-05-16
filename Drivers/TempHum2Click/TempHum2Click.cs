@@ -11,7 +11,11 @@
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.I2c;
+#else
 using GHIElectronics.TinyCLR.Devices.I2c;
+#endif
 
 using System;
 using System.Threading;
@@ -29,7 +33,11 @@ namespace MBN.Modules
         public TempHum2Click(Hardware.Socket socket)
         {
             _socket = socket;
-            _sensor = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings( 0x70, 100000));
+#if (NANOFRAMEWORK_1_0)
+            _sensor = I2cDevice.Create(new I2cConnectionSettings(socket.I2cBus, 0x70, I2cBusSpeed.StandardMode));
+#else
+			_sensor = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings(0x70, 100000));
+#endif
 
             Thread.Sleep(50); // Time fromm VDD >= 1.64V until ready for a full conversion.
 

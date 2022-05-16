@@ -1,4 +1,8 @@
-﻿using GHIElectronics.TinyCLR.Devices.I2c;
+﻿#if (NANOFRAMEWORK_1_0)
+using System.Device.I2c;
+#else
+using GHIElectronics.TinyCLR.Devices.I2c;
+#endif
 
 using System;
 using System.Threading;
@@ -25,7 +29,11 @@ namespace MBN.Modules
         public TempHumClick(Hardware.Socket socket)
         {
             _socket = socket;
-            _sensor = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings(I2cAddress, 100000));
+#if (NANOFRAMEWORK_1_0)
+            _sensor = I2cDevice.Create(new I2cConnectionSettings(socket.I2cBus, I2cAddress, I2cBusSpeed.StandardMode));
+#else
+			_sensor = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings(I2cAddress, 100000));
+#endif
 
                 Reset();
 

@@ -11,7 +11,11 @@
  * 
  */
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.Gpio;
+#else
 using GHIElectronics.TinyCLR.Devices.Gpio;
+#endif
 
 using System;
 
@@ -67,6 +71,13 @@ namespace MBN.Modules
         /// <param name="socket">The socket on which the ButtonRClick module is plugged on MikroBus.Net board</param>
         public ButtonRClick(Hardware.Socket socket)
         {
+#if (NANOFRAMEWORK_1_0)
+            _button = new GpioController().OpenPin(socket.Int, PinMode.InputPullDown);
+            _button.ValueChanged += ButtonValueChanged;
+
+            _led = new GpioController().OpenPin(socket.PwmPin, PinMode.Output);
+            _led.Write(PinValue.Low);
+#else
             _button = GpioController.GetDefault().OpenPin(socket.Int);
             _button.SetDriveMode(GpioPinDriveMode.InputPullDown);
             _button.ValueChanged += ButtonValueChanged;
@@ -74,6 +85,7 @@ namespace MBN.Modules
             _led = GpioController.GetDefault().OpenPin(socket.PwmPin);
             _led.SetDriveMode(GpioPinDriveMode.Output);
             _led.Write(GpioPinValue.Low);
+#endif
         }
 
         #endregion
@@ -174,7 +186,11 @@ namespace MBN.Modules
         /// </code>
         /// </example>
         /// <value>A <see cref="System.Boolean"/> indicating whether the ButtonR Led is on.</value>
+#if (NANOFRAMEWORK_1_0)
+        public Boolean IsLedOn => _led.Read() == PinValue.High;
+#else
         public Boolean IsLedOn => _led.Read() == GpioPinValue.High;
+#endif
 
         /// <summary>
         /// Whether or not the button is pressed.
@@ -185,7 +201,11 @@ namespace MBN.Modules
         /// </code>
         /// </example>
         /// <value>A <see cref="System.Boolean"/> indicating whether the ButtonR click is pressed.</value>
+#if (NANOFRAMEWORK_1_0)
+        public Boolean Pressed => _button.Read() == PinValue.High;
+#else
         public Boolean Pressed => _button.Read() == GpioPinValue.High;
+#endif
 
         #endregion
 
@@ -202,7 +222,11 @@ namespace MBN.Modules
         /// <returns> <see cref="System.Void"/></returns>
         public void TurnLedOn()
         {
+#if (NANOFRAMEWORK_1_0)
+            _led.Write(PinValue.High);
+#else
             _led.Write(GpioPinValue.High);
+#endif
         }
 
         /// <summary>
@@ -216,7 +240,11 @@ namespace MBN.Modules
         /// <returns> <see cref="System.Void"/></returns>
         public void TurnLedOff()
         {
+#if (NANOFRAMEWORK_1_0)
+            _led.Write(PinValue.Low);
+#else
             _led.Write(GpioPinValue.Low);
+#endif
         }
 
         /// <summary>
@@ -230,8 +258,12 @@ namespace MBN.Modules
         /// <returns> <see cref="System.Void"/></returns>
         public void ToggleLed()
         {
+#if (NANOFRAMEWORK_1_0)
+            _led.Toggle();
+#else
             if (IsLedOn) TurnLedOff();
             else TurnLedOn();
+#endif
         }
 
         #endregion
@@ -247,10 +279,15 @@ namespace MBN.Modules
 		public delegate void ButtonEventHandler(ButtonRClick sender, ButtonState state);
 
 		private ButtonEventHandler _onButtonEvent;
-
+#if (NANOFRAMEWORK_1_0)
+        private void ButtonValueChanged(object sender, PinValueChangedEventArgs e)
+        {
+            ButtonState state = e.ChangeType == PinEventTypes.Falling ? ButtonState.Released : ButtonState.Pressed;
+#else
         private void ButtonValueChanged(GpioPin sender, GpioPinValueChangedEventArgs e)
         {
             ButtonState state = e.Edge== GpioPinEdge.FallingEdge ? ButtonState.Released : ButtonState.Pressed;
+#endif
 
 			switch (state)
 			{

@@ -4,14 +4,18 @@
  * Version 1.0 :
  *  - Initial revision coded by Stephen Cardinale
  *    
- * Copyright © 2020 MikroBus.Net
+ * Copyright ï¿½ 2020 MikroBus.Net
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
-using GHIElectronics.TinyCLR.Devices.Onewire;
+#if (NANOFRAMEWORK_1_0)
+using nanoFramework.Device.OneWire;
+#else
+using GHIElectronics.TinyCLR.Devices.OneWire;
+#endif
 
 using System;
 using System.Collections;
@@ -97,16 +101,20 @@ namespace MBN.Modules
         /// <param name="gpio">The pin used for the One-Wire Bus.</param>
         public Thermo2Click(Hardware.Socket socket, GpioSelect gpio = GpioSelect.GP0)
         {
+#if (NANOFRAMEWORK_1_0)
+            Interface = new OneWireHost();
+#else
             Interface = new OneWireController(gpio == GpioSelect.GP0 ? socket.PwmPin : socket.AnPin);
+#endif
             _deviceList = new ArrayList();
             _deviceList = GetDeviceList();
 
             if (_deviceList.Count == 0) throw new DeviceInitialisationException("No Thermo2 Clicks found on the OneWire Bus.");
         }
 
-        #endregion
+#endregion
 
-        #region Constants
+#region Constants
 
         private const Byte TempLsb = 0;
         private const Byte TempMsb = 1;
@@ -117,15 +125,15 @@ namespace MBN.Modules
 
         private const Byte DeviceFamilyCode = 0x3B;
 
-        #endregion
+#endregion
 
-        #region Fields
+#region Fields
 
         private readonly ArrayList _deviceList;
 
-        #endregion
+#endregion
 
-        #region ENUMS
+#region ENUMS
 
         internal enum RomCommands
         {
@@ -152,22 +160,22 @@ namespace MBN.Modules
         public enum Resolution
         {
             /// <summary>
-            ///     9-Bit with a resolution of 0.5°C.
+            ///     9-Bit with a resolution of 0.5ï¿½C.
             /// </summary>
             Resolution9Bit = 0,
 
             /// <summary>
-            ///     10-Bit with a resolution of 0.25°C.
+            ///     10-Bit with a resolution of 0.25ï¿½C.
             /// </summary>
             Resolution10Bit = 1,
 
             /// <summary>
-            ///     11-Bit with a resolution of 0.125°C.
+            ///     11-Bit with a resolution of 0.125ï¿½C.
             /// </summary>
             Resolution11Bit = 2,
 
             /// <summary>
-            ///     12-Bit with a resolution of 0.0625°C.
+            ///     12-Bit with a resolution of 0.0625ï¿½C.
             /// </summary>
             Resolution12Bit = 3
         }
@@ -187,9 +195,9 @@ namespace MBN.Modules
             GP1 = 1
         }
 
-        #endregion
+#endregion
 
-        #region Public Properties
+#region Public Properties
 
         /// <summary>
         ///     Returns an ArrayList of the unique 64-Bit Addresses of all Thermo2 Clicks on the OneWire Bus.
@@ -206,7 +214,11 @@ namespace MBN.Modules
         /// <summary>
         ///     Exposes the native TinyCLR 1-Wire Bus.
         /// </summary>
+#if (NANOFRAMEWORK_1_0)
+        public OneWireHost Interface { get; }
+#else
         public OneWireController Interface { get; }
+#endif
 
         /// <summary>
         ///     Gets the number of Thermo2 Clicks on the OneWire Bus.
@@ -247,11 +259,11 @@ namespace MBN.Modules
         /// </example>
         public TemperatureUnits TemperatureUnit { get; set; } = TemperatureUnits.Celsius;
 
-        #endregion
+#endregion
 
-        #region Pubic Methods
+#region Pubic Methods
 
-        #region Device Related Methods
+#region Device Related Methods
 
         /// <summary>
         /// Returns an ArrayList of all Thermo2 Clicks on the OneWire Bus.
@@ -351,7 +363,7 @@ namespace MBN.Modules
         public UInt64 GetSerialNumber(Byte[] oneWireAddress)
         {
             return
-                BitConverter.ToUInt64(
+                System.BitConverter.ToUInt64(
                     new[] { oneWireAddress[1], oneWireAddress[2], oneWireAddress[3], oneWireAddress[4], oneWireAddress[5], (Byte)0x00, (Byte) 0x00, (Byte) 0x00}, 0);
         }
 
@@ -378,13 +390,13 @@ namespace MBN.Modules
         /// </example>
         public Byte[] SerialNumberToOneWireAddress(Int64 serialNumber)
         {
-            var sn = Utility.CombineArrays(new[] { DeviceFamilyCode }, Utility.ExtractRangeFromArray(BitConverter.GetBytes(serialNumber), 0, 6));
+            var sn = Utility.CombineArrays(new[] { DeviceFamilyCode }, Utility.ExtractRangeFromArray(System.BitConverter.GetBytes(serialNumber), 0, 6));
             return Utility.CombineArrays(sn, new[] { CalculateCrc(sn, 7) });
         }
 
-        #endregion
+#endregion
 
-        #region Device Resolution Methods
+#region Device Resolution Methods
 
         /// <summary>
         ///     Returns the current resolution of the device, 9-12 Bit.
@@ -407,8 +419,11 @@ namespace MBN.Modules
         public Resolution GetResolution(Byte[] oneWireAddress)
         {
             GetDeviceList();
-
+#if (NANOFRAMEWORK_1_0)
+            if (!IsValidId(oneWireAddress) || Interface.TouchReset() == false)
+#else
             if (!IsValidId(oneWireAddress) || Interface.TouchReset() <= 0)
+#endif
             {
                 return Resolution.Resolution12Bit;
             }
@@ -550,9 +565,9 @@ namespace MBN.Modules
             }
         }
 
-        #endregion
+#endregion
 
-        #region Temperature Measurement Related Methods
+#region Temperature Measurement Related Methods
 
         /// <summary>
         ///     Reads the temperature of a single Thermo2 Click configuration or the first device found on the OneWire Bus in a multiple sensor configuration.
@@ -580,7 +595,11 @@ namespace MBN.Modules
 
             if (IsParasitic((Byte[]) DeviceList[0])) throw new NotSupportedException("Reading temperature in Parasitic Mode is not supported.");
 
+#if (NANOFRAMEWORK_1_0)
+            if (Interface.TouchReset() == false) return Single.MinValue;
+#else
             if (Interface.TouchReset() <= 0) return Single.MinValue;
+#endif
 
             Interface.WriteByte((Byte) RomCommands.SkipRom); // Skip ROM, we only have one device
             Interface.WriteByte((Byte) FunctionCommands.StartTemperatureConversion); // Start temperature conversion
@@ -667,7 +686,11 @@ namespace MBN.Modules
 
             if (!IsValidId(oneWireAddress)) return Single.MinValue;
 
+#if (NANOFRAMEWORK_1_0)
+            if (Interface.TouchReset() == false) return Single.MinValue;
+#else
             if (Interface.TouchReset() <= 0) return Single.MinValue;
+#endif
 
             SelectDevice(oneWireAddress);
 
@@ -729,7 +752,7 @@ namespace MBN.Modules
         /// <summary>
         ///     Reads all Thermo2 Click on the OneWire Bus.
         /// </summary>
-        /// <returns>A HashTable containing a Key/Value Pair of the unique 64-Bit Address of the Thermo2 Click and the temperature in °C.</returns>
+        /// <returns>A HashTable containing a Key/Value Pair of the unique 64-Bit Address of the Thermo2 Click and the temperature in ï¿½C.</returns>
         /// <remarks>This method works in either a single sensor or multi sensor configuration.</remarks>
         /// <example>Example usage:
         /// <code language="C#">
@@ -763,9 +786,9 @@ namespace MBN.Modules
             }
         }
 
-        #endregion
+#endregion
 
-        #region Alarm Related Methods
+#region Alarm Related Methods
 
         /// <summary>
         ///     Gets an ArrayList of all Thermo2 Clicks on the OneWire Bus that have the AlarmFlag set.
@@ -789,6 +812,22 @@ namespace MBN.Modules
             var alarmList = new ArrayList();
 
             // find the first device (only devices alarming)
+#if (NANOFRAMEWORK_1_0)
+            bool result = Interface.FindFirstDevice(true, true);
+            while (result != true)
+            {
+                var sNum = new Byte[8];
+
+                // retrieve the serial number just found
+                sNum = Interface.SerialNumber;
+
+                // save serial number
+                alarmList.Add(sNum);
+
+                // find the next alarming device
+                result = Interface.FindNextDevice(false, true);
+            }
+#else
             Int32 result = Interface.FindFirstDevice(true, true);
             while (result != 0)
             {
@@ -803,6 +842,7 @@ namespace MBN.Modules
                 // find the next alarming device
                 result = Interface.FindNextDevice(false, true);
             }
+#endif
             return alarmList;
         }
 
@@ -837,14 +877,14 @@ namespace MBN.Modules
 
             foreach (Byte[] device in alarmArray)
             {
-                if (BitConverter.ToInt64(oneWireAddress, 0) == BitConverter.ToInt64(device, 0)) return true;
+                if (System.BitConverter.ToInt64(oneWireAddress, 0) == System.BitConverter.ToInt64(device, 0)) return true;
             }
 
             return false;
         }
 
         /// <summary>
-        ///     Resets the Low and High Temperature Alarms Settings for the specified OneWire Device to -55°C and 125° (the range of the Thermo2 Click).
+        ///     Resets the Low and High Temperature Alarms Settings for the specified OneWire Device to -55ï¿½C and 125ï¿½ (the range of the Thermo2 Click).
         /// </summary>
         /// <param name="oneWireAddress">The OneWire device address.</param>
         /// <param name="writeToEeprom">If true, writes the new settings to the device EEPROM.</param>
@@ -879,10 +919,10 @@ namespace MBN.Modules
         }
 
         /// <summary>
-        ///     Returns the Low Temperature Alarm setting of the specified device in °C.
+        ///     Returns the Low Temperature Alarm setting of the specified device in ï¿½C.
         /// </summary>
         /// <param name="oneWireAddress">The OneWire Address of the specified device.</param>
-        /// <returns>The Low Temperature Alarm setting in °C</returns>
+        /// <returns>The Low Temperature Alarm setting in ï¿½C</returns>
         /// <remarks>All temperature alarms settings are in the <see cref="TemperatureUnits.Celsius"/> unit only.</remarks>
         /// <example>Example usage:
         /// <code language="C#">
@@ -901,7 +941,11 @@ namespace MBN.Modules
         {
             GetDeviceList();
 
+#if (NANOFRAMEWORK_1_0)
+            if (!IsValidId(oneWireAddress) || Interface.TouchReset() == false) return Int32.MinValue;
+#else
             if (!IsValidId(oneWireAddress) || Interface.TouchReset() <= 0) return Int32.MinValue;
+#endif
 
             SelectDevice(oneWireAddress);
 
@@ -911,10 +955,10 @@ namespace MBN.Modules
         }
 
         /// <summary>
-        ///     Returns the High Temperature Alarm setting of the specified device in °C.
+        ///     Returns the High Temperature Alarm setting of the specified device in ï¿½C.
         /// </summary>
         /// <param name="oneWireAddress">The OneWire Address of the specified device.</param>
-        /// <returns>The High Temperature Alarm setting in °C</returns>
+        /// <returns>The High Temperature Alarm setting in ï¿½C</returns>
         /// <remarks>All temperature alarms settings are in the <see cref="TemperatureUnits.Celsius"/> unit only.</remarks>
         /// <example>Example usage:
         /// <code language="C#">
@@ -933,7 +977,11 @@ namespace MBN.Modules
         {
             GetDeviceList();
 
+#if (NANOFRAMEWORK_1_0)
+            if (!IsValidId(oneWireAddress) || Interface.TouchReset() == false) return Int32.MinValue;
+#else
             if (!IsValidId(oneWireAddress) || Interface.TouchReset() <= 0) return Int32.MinValue;
+#endif
 
             SelectDevice(oneWireAddress);
 
@@ -943,10 +991,10 @@ namespace MBN.Modules
         }
 
         /// <summary>
-        /// Sets the low alarm temperature for a specific device in °C.
+        /// Sets the low alarm temperature for a specific device in ï¿½C.
         /// </summary>
         /// <param name="oneWireAddress">The OneWire Address of the specified device.</param>
-        /// <param name="lowTemperatureAlarm">Low Temperature Alarm set point. The valid range is -55°C - 125°C </param>
+        /// <param name="lowTemperatureAlarm">Low Temperature Alarm set point. The valid range is -55ï¿½C - 125ï¿½C </param>
         /// <param name="writeToEeprom">If true, writes the new Low Temperature Alarm setting to NVRAM EEPROM.</param>
         /// <returns>True if successful or otherwise false.</returns>
         /// <exception cref="ArgumentException">Throws an ArgumentException if the <para>lowTemperatureAlarm</para> setting is higher than or equal to the <see cref="SetHighTempertureAlarm"/> method.</exception>
@@ -970,7 +1018,7 @@ namespace MBN.Modules
 
             if (!IsValidId(oneWireAddress)) return false;
 
-            // Make sure the alarm setting is within the device's range (-55°C to 125°C)
+            // Make sure the alarm setting is within the device's range (-55ï¿½C to 125ï¿½C)
             lowTemperatureAlarm = (SByte) (lowTemperatureAlarm < -55 ? -55 : lowTemperatureAlarm > 125 ? 125 : lowTemperatureAlarm);
 
             // Verify the Low Temperature alarm setting is not higher than the High Temperature Alarm setting in EEPROM, if so reset the values to default.
@@ -984,10 +1032,10 @@ namespace MBN.Modules
         }
 
         /// <summary>
-        /// Sets the low alarm temperature for a specific device in °C.
+        /// Sets the low alarm temperature for a specific device in ï¿½C.
         /// </summary>
         /// <param name="oneWireAddress">The OneWire Address of the specified device.</param>
-        /// <param name="highTemperatureAlarm">High Temperature Alarm set point. The valid range is -55°C - 125°C </param>
+        /// <param name="highTemperatureAlarm">High Temperature Alarm set point. The valid range is -55ï¿½C - 125ï¿½C </param>
         /// <param name="writeToEeprom">If true, writes the new Low Temperature Alarm setting to NVRAM EEPROM.</param>
         /// <returns>True if successful or otherwise false.</returns>
         /// <exception cref="ArgumentException">Throws an ArgumentException if the <para>lowTemperatureAlarm</para> setting is higher than or equal to the <see cref="SetHighTempertureAlarm"/> method.</exception>
@@ -1011,7 +1059,7 @@ namespace MBN.Modules
 
             if (!IsValidId(oneWireAddress)) throw new ArgumentException("Invalid OneWired Address", nameof(oneWireAddress));
 
-            // Make sure the alarm setting is within the device's range (-55°C to 125°C)
+            // Make sure the alarm setting is within the device's range (-55ï¿½C to 125ï¿½C)
             highTemperatureAlarm = (SByte) (highTemperatureAlarm < -55 ? -55 : highTemperatureAlarm > 125 ? 125 : highTemperatureAlarm);
 
             // Verify the Low Temperature alarm setting is not higher than the High Temperature Alarm setting in EEPROM, if so reset the values to default.
@@ -1025,11 +1073,11 @@ namespace MBN.Modules
         }
 
         /// <summary>
-        /// Sets both the low  and hight temperature alarm at once for a specific device in °C.
+        /// Sets both the low  and hight temperature alarm at once for a specific device in ï¿½C.
         /// </summary>
         /// <param name="oneWireAddress">The OneWire Address of the specified device.</param>
-        /// <param name="lowTemperatureAlarm">Low Temperature Alarm set point. The valid range is -55°C - 125°C </param>
-        /// <param name="highTemperatureAlarm">High Temperature Alarm set point. The valid range is -55°C - 125°C </param>
+        /// <param name="lowTemperatureAlarm">Low Temperature Alarm set point. The valid range is -55ï¿½C - 125ï¿½C </param>
+        /// <param name="highTemperatureAlarm">High Temperature Alarm set point. The valid range is -55ï¿½C - 125ï¿½C </param>
         /// <param name="writeToEeprom">If true, writes the new Low Temperature Alarm setting to NVRAM EEPROM.</param>
         /// <returns>True if successful or otherwise false.</returns>
         /// <exception cref="ArgumentException">Throws an ArgumentException if the <para>lowTemperatureAlarm</para> setting is higher than or equal to the <see cref="SetHighTempertureAlarm"/> method or if the <para>highTemperatureAlarm</para> setting is lower than or equal to the <see cref="SetLowTempertureAlarm"/> method.</exception>
@@ -1053,7 +1101,7 @@ namespace MBN.Modules
 
             if (!IsValidId(oneWireAddress)) return false;
 
-            // Make sure the alarm setting is within the device's range (-55°C to 125°C)
+            // Make sure the alarm setting is within the device's range (-55ï¿½C to 125ï¿½C)
             highTemperatureAlarm = (SByte) (highTemperatureAlarm < -55 ? -55 : highTemperatureAlarm > 125 ? 125 : highTemperatureAlarm);
             lowTemperatureAlarm = (SByte) (lowTemperatureAlarm < -55 ? -55 : lowTemperatureAlarm > 125 ? 125 : lowTemperatureAlarm);
 
@@ -1075,10 +1123,10 @@ namespace MBN.Modules
         }
 
         /// <summary>
-        /// Sets both the low  and hight temperature alarm at once for all devices on the One-Wire Bus device in °C.
+        /// Sets both the low  and hight temperature alarm at once for all devices on the One-Wire Bus device in ï¿½C.
         /// </summary>
-        /// <param name="lowTemperatureAlarm">Low Temperature Alarm set point. The valid range is -55°C - 125°C </param>
-        /// <param name="highTemperatureAlarm">High Temperature Alarm set point. The valid range is -55°C - 125°C </param>
+        /// <param name="lowTemperatureAlarm">Low Temperature Alarm set point. The valid range is -55ï¿½C - 125ï¿½C </param>
+        /// <param name="highTemperatureAlarm">High Temperature Alarm set point. The valid range is -55ï¿½C - 125ï¿½C </param>
         /// <param name="writeToEeprom">If true, writes the new Low Temperature Alarm setting to NVRAM EEPROM.</param>
         /// <returns>True if successful or otherwise false.</returns>
         /// <exception cref="ArgumentException">Throws an ArgumentException if the <para>lowTemperatureAlarm</para> setting is higher than or equal to the <see cref="SetHighTempertureAlarm"/> method or if the <para>highTemperatureAlarm</para> setting is lower than or equal to the <see cref="SetLowTempertureAlarm"/> method.</exception>
@@ -1099,11 +1147,11 @@ namespace MBN.Modules
             }
         }
 
-        #endregion
+#endregion
 
-        #endregion
+#endregion
 
-        #region Private Methods
+#region Private Methods
 
         private static Byte CalculateCrc(Byte[] data, Int32 length)
         {
@@ -1164,7 +1212,11 @@ namespace MBN.Modules
 
         private Boolean SelectDevice(Byte[] oneWireAddress)
         {
+#if (NANOFRAMEWORK_1_0)
+            if (Interface.TouchReset() == false) return false;
+#else
             if (Interface.TouchReset() <= 0) return false;
+#endif
 
             Interface.WriteByte((Byte) RomCommands.MatchRom);
 
@@ -1217,9 +1269,15 @@ namespace MBN.Modules
             SelectDevice(oneWireAddress);
 
             Interface.WriteByte((Byte) FunctionCommands.WriteScratchPad);
+#if (NANOFRAMEWORK_1_0)
+            Interface.WriteByte((byte)scratchPad[HighTempAlarmBit]); // high alarm temp
+            Interface.WriteByte((byte)scratchPad[LowTempAlarmbit]); // low alarm temp
+            Interface.WriteByte((byte)scratchPad[ConfigurationBit]); // configuration
+#else
             Interface.WriteByte(scratchPad[HighTempAlarmBit]); // high alarm temp
             Interface.WriteByte(scratchPad[LowTempAlarmbit]); // low alarm temp
             Interface.WriteByte(scratchPad[ConfigurationBit]); // configuration
+#endif
 
 
             SelectDevice(oneWireAddress);
@@ -1264,7 +1322,7 @@ namespace MBN.Modules
             }
         }
 
-        #endregion
+#endregion
     }
 
     internal class Utility

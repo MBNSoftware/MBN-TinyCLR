@@ -121,7 +121,11 @@ namespace MBN.Modules
 	}
 }
 
+#if (NANOFRAMEWORK_1_0)
+namespace nanoFramework.Presentation
+#else
 namespace Microsoft.SPOT
+#endif
 {
 
 	/// <summary>

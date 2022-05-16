@@ -14,7 +14,11 @@
 
 #region Usings
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.I2c;
+#else
 using GHIElectronics.TinyCLR.Devices.I2c;
+#endif
 
 using System;
 using System.Threading;
@@ -62,7 +66,7 @@ namespace MBN.Modules
     ///                 _sensor.ReadSensor(out Single temperature, out Single pressure, out Single altitude);
     ///
     ///                 Debug.WriteLine("---------------------------------");
-    ///                 Debug.WriteLine($"Temperature.......: {temperature:F2} °F");
+    ///                 Debug.WriteLine($"Temperature.......: {temperature:F2} ï¿½F");
     ///                 Debug.WriteLine($"Pressure..........: {pressure:F0} Pascals");
     ///                 Debug.WriteLine($"Altitude..........: {altitude:F0} meters");
     ///
@@ -82,10 +86,14 @@ namespace MBN.Modules
         /// </summary>
         /// <param name="socket">The <see cref="Hardware.Socket"/> that the Altitude3 Click is inserted into.</param>
         /// <exception cref="DeviceInitialisationException">A DeviceInitialisationException will be thrown if the Altitude3 Click does not complete its initialization properly.</exception>
-        public Altitude3Click(Hardware.Socket socket)
+        public Altitude3Click(Hardware.Socket socket, Int32 address = 0x63)
         {
             _socket = socket;
-            _sensor = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings(0x63, 100000));
+#if (NANOFRAMEWORK_1_0)
+            _sensor = I2cDevice.Create(new I2cConnectionSettings(socket.I2cBus, address, I2cBusSpeed.StandardMode));
+#else
+            _sensor = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings(address, 100000));
+#endif
 
             Reset();
 
@@ -126,8 +134,8 @@ namespace MBN.Modules
         ///
         ///     Debug.Print("---------------------------------");
         ///     Debug.Print("Temperature.......: " + temperature +
-        ///                 (_sensor.TemperatureUnit == TemperatureUnits.Celsius ? " °C" :
-        ///                    _sensor.TemperatureUnit == TemperatureUnits.Fahrenheit ? " °F" : " °K"));
+        ///                 (_sensor.TemperatureUnit == TemperatureUnits.Celsius ? " ï¿½C" :
+        ///                    _sensor.TemperatureUnit == TemperatureUnits.Fahrenheit ? " ï¿½F" : " ï¿½K"));
         ///     Debug.Print("Pressure..........: " + pressure + " Pa");
         ///     Debug.Print("Altitude..........: " + altitude + " meters");
         ///
@@ -145,8 +153,8 @@ namespace MBN.Modules
         ///     Debug.Print(
         ///        "Temperature.......: " <![CDATA[&]]> temperature <![CDATA[&]]>
         ///         (If _
-        ///             (_sensor.TemperatureUnit = TemperatureUnits.Celsius, " °C",
-        ///             If(_sensor.TemperatureUnit = TemperatureUnits.Fahrenheit, " °F", " °K"))))
+        ///             (_sensor.TemperatureUnit = TemperatureUnits.Celsius, " ï¿½C",
+        ///             If(_sensor.TemperatureUnit = TemperatureUnits.Fahrenheit, " ï¿½F", " ï¿½K"))))
         ///     Debug.Print("Pressure..........: " <![CDATA[&]]> pressure <![CDATA[&]]> " Pa")
         ///     Debug.Print("Altitude..........: " <![CDATA[&]]> altitude <![CDATA[&]]> " meters")
         ///     Thread.Sleep(1000)
@@ -279,22 +287,22 @@ namespace MBN.Modules
         public enum Mode
         {
             /// <summary>
-            /// Low Power mode. Conversion time is 1.8 ms, current consumption is 1.3 µA and Pressure RMS noise is +/- 3.3 Pascals.
+            /// Low Power mode. Conversion time is 1.8 ms, current consumption is 1.3 ï¿½A and Pressure RMS noise is +/- 3.3 Pascals.
             /// </summary>
             LowPower,
 
             /// <summary>
-            /// Normal Power mode. Conversion time is 6.3 ms, current consumption is 2.6 µA and Pressure RMS noise is +/- 1.6 Pascals.
+            /// Normal Power mode. Conversion time is 6.3 ms, current consumption is 2.6 ï¿½A and Pressure RMS noise is +/- 1.6 Pascals.
             /// </summary>
             Normal,
 
             /// <summary>
-            /// Low Noise mode. Conversion time is 23.8 ms, current consumption is 5.2 µA and Pressure RMS noise is +/- 0.8 Pascals.
+            /// Low Noise mode. Conversion time is 23.8 ms, current consumption is 5.2 ï¿½A and Pressure RMS noise is +/- 0.8 Pascals.
             /// </summary>
             LowNoise,
 
             /// <summary>
-            /// Ultra Low Noise mode. Conversion time is 94.5 ms, current consumption is 10.4 µA and Pressure RMS noise is +/- 0.4 Pascals.
+            /// Ultra Low Noise mode. Conversion time is 94.5 ms, current consumption is 10.4 ï¿½A and Pressure RMS noise is +/- 0.4 Pascals.
             /// </summary>
             UltraLowNoise
         }

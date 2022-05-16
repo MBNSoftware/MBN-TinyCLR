@@ -11,10 +11,16 @@
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
-using System;
-using System.Threading;
+#if (NANOFRAMEWORK_1_0)
+using System.Device.Gpio;
+using Windows.Devices.Pwm;
+#else
 using GHIElectronics.TinyCLR.Devices.Gpio;
 using GHIElectronics.TinyCLR.Devices.Pwm;
+#endif
+
+using System;
+using System.Threading;
 
 namespace MBN.Modules
 {
@@ -78,7 +84,11 @@ namespace MBN.Modules
 
         private readonly GpioPin _fault;
         private readonly GpioPin _select1, _select2, _sleep;
+#if (NANOFRAMEWORK_1_0)
+        private readonly PwmPin _pwmOut;
+#else
         private readonly PwmChannel _pwmOut;
+#endif
         private PowerModes _powerMode;
 
         // Internal variables
@@ -92,6 +102,23 @@ namespace MBN.Modules
         /// <param name="dutyCycle">The initial duty cycle of PWM. Default to 0.0 %, that is : motor stopped</param>
         public DCMotorClick(Hardware.Socket socket, Double frequency = 1000.0, Double dutyCycle = 0.0)
         {
+#if (NANOFRAMEWORK_1_0)
+            // Select1/2 : selection of decay modes. Only Fast decay implemented here.
+            _select1 = new GpioController().OpenPin(socket.Rst, PinMode.Output);
+            _select1.Write(PinValue.Low);
+
+            _select2 = new GpioController().OpenPin(socket.Cs, PinMode.Output);
+            _select2.Write(PinValue.Low);
+
+            _sleep = new GpioController().OpenPin(socket.AnPin, PinMode.Output);
+            _sleep.Write(PinValue.High);
+
+            _fault = new GpioController().OpenPin(socket.Int, PinMode.Input);
+
+            var PWM = PwmController.FromId(socket.PwmController);
+            PWM.SetDesiredFrequency(frequency);
+            _pwmOut = PWM.OpenPin(socket.PwmChannel);
+#else
             // Select1/2 : selection of decay modes. Only Fast decay implemented here.
             _select1 = GpioController.GetDefault().OpenPin(socket.Rst);
             _select1.SetDriveMode(GpioPinDriveMode.Output);
@@ -105,21 +132,30 @@ namespace MBN.Modules
             _sleep.SetDriveMode(GpioPinDriveMode.Output);
             _sleep.Write(GpioPinValue.High);
 
+            _fault = GpioController.GetDefault().OpenPin(socket.Int);
+            _fault.SetDriveMode(GpioPinDriveMode.Input);
             var PWM = PwmController.FromName(socket.PwmController);
             PWM.SetDesiredFrequency(frequency);
             _pwmOut = PWM.OpenChannel(socket.PwmChannel);
+#endif
+
+            _fault.ValueChanged += Fault_ValueChanged;
+
             _pwmOut.SetActiveDutyCyclePercentage(dutyCycle);
 
-            _fault = GpioController.GetDefault().OpenPin(socket.Int);
-            _fault.SetDriveMode(GpioPinDriveMode.Input);
-            _fault.ValueChanged += Fault_ValueChanged;
+
 
             IsMoving = false;                                                      // Motor not running
             _powerMode = PowerModes.On;
         }
 
+#if (NANOFRAMEWORK_1_0)
+        private void Fault_ValueChanged(object sender, PinValueChangedEventArgs e)
+        {
+#else
         private void Fault_ValueChanged(GpioPin sender, GpioPinValueChangedEventArgs e)
         {
+#endif
             EventHandler tempEvent = OnFault;
             tempEvent(this, null);
         }
@@ -153,7 +189,11 @@ namespace MBN.Modules
         public void Move(Directions direction, Double speed = 1.0, Int32 rampTime = 0)
         {
             if (IsMoving) { _pwmOut.Stop(); Thread.Sleep(200); }
+#if (NANOFRAMEWORK_1_0)
+            _select2.Write((direction == Directions.Backward) ? PinValue.High : PinValue.Low);
+#else
             _select2.Write((direction == Directions.Backward) ? GpioPinValue.High : GpioPinValue.Low);
+#endif
             if (rampTime == 0) 
             { 
                 _pwmOut.SetActiveDutyCyclePercentage(speed);
@@ -238,7 +278,11 @@ namespace MBN.Modules
             {
                 if (value == PowerModes.Off) { throw new NotImplementedException("PowerModes.Off");}
                 _powerMode = value;
+#if (NANOFRAMEWORK_1_0)
+                _sleep.Write((value == PowerModes.Low) ? PinValue.High : PinValue.Low);
+#else
                 _sleep.Write((value == PowerModes.Low) ? GpioPinValue.High : GpioPinValue.Low);
+#endif
             }
         }
     }

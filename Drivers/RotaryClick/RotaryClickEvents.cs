@@ -11,7 +11,12 @@
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.Gpio;
+#else
 using GHIElectronics.TinyCLR.Devices.Gpio;
+#endif
+
 using System;
 
 namespace MBN.Modules
@@ -39,7 +44,11 @@ namespace MBN.Modules
             /// Initializes a new instance of the <see cref="ButtonPressedEventArgs"/> class.
             /// </summary>
             /// <param name="gpioPinEdge">Rising or falling edge</param>
+#if (NANOFRAMEWORK_1_0)
+            public ButtonPressedEventArgs(PinEventTypes gpioPinEdge)
+#else
             public ButtonPressedEventArgs(GpioPinEdge gpioPinEdge)
+#endif
             {
                 Edge = gpioPinEdge;
             }
@@ -47,7 +56,11 @@ namespace MBN.Modules
             /// <summary>
             /// State of the button edge
             /// </summary>
+#if (NANOFRAMEWORK_1_0)
+            public PinEventTypes Edge
+#else
             public GpioPinEdge Edge
+#endif
             {
                 get; private set;
             }

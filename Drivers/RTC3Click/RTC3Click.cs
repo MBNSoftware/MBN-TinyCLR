@@ -1,4 +1,8 @@
-﻿using GHIElectronics.TinyCLR.Devices.I2c;
+﻿#if (NANOFRAMEWORK_1_0)
+using System.Device.I2c;
+#else
+using GHIElectronics.TinyCLR.Devices.I2c;
+#endif
 
 using System;
 
@@ -11,7 +15,11 @@ namespace MBN.Modules
         public RTC3Click(Hardware.Socket socket)
         {
             _socket = socket;
-            _rtc3 = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings(_slaveAddress, 400000));
+#if (NANOFRAMEWORK_1_0)
+            _rtc3 = I2cDevice.Create(new I2cConnectionSettings(socket.I2cBus, _slaveAddress, I2cBusSpeed.FastMode));
+#else
+			_rtc3 = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings(_slaveAddress, 400000));
+#endif
         }
 
         #endregion

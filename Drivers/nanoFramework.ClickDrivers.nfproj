@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|AnyCPU">
+      <Configuration>Debug</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|AnyCPU">
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <NanoFrameworkProjectSystemPath>$(MSBuildExtensionsPath)\nanoFramework\v1.0\</NanoFrameworkProjectSystemPath>
+  </PropertyGroup>
+  <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.Default.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.Default.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectTypeGuids>{11A8DD76-328B-46DF-9F39-F559912D0360};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <ProjectGuid>af593d8b-80ff-4561-adbe-220f56fff432</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <FileAlignment>512</FileAlignment>
+    <RootNamespace>MBN.Modules</RootNamespace>
+    <AssemblyName>nanoFramework.ClickDrivers</AssemblyName>
+    <TargetFrameworkVersion>v1.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
+  <ItemGroup>
+    <Compile Include="4-20mA Click\4-20mAClick.cs" />
+    <Compile Include="Accel Click\AccelClick.cs" />
+    <Compile Include="Adc3 Click\Adc3Click.cs" />
+    <Compile Include="AdcClick\AdcClick.cs" />
+    <Compile Include="Altitude2Click\Altitude2Click.cs" />
+    <Compile Include="Altitude3Click\Altitude3Click.cs" />
+    <Compile Include="Ambient2Click\Ambient2Click.cs" />
+    <Compile Include="AmbientClick\AmbientClick.cs" />
+    <Compile Include="Bargraph2Click\Bargraph2Click.cs" />
+    <Compile Include="BargraphClick\BargraphClick.cs" />
+    <Compile Include="BarometerClick\Barometer.cs" />
+    <Compile Include="BiHallClick\BiHall.cs" />
+    <Compile Include="BME280\bme280.cs" />
+    <Compile Include="BMP085\BMP085.cs" />
+    <Compile Include="BMP180\BMP180.cs" />
+    <Compile Include="BMP183\BMP183.cs" />
+    <Compile Include="BMP280\BMP280.cs" />
+    <Compile Include="ButtonRClick\ButtonRClick.cs" />
+    <Compile Include="BuzzerClick\BuzzerClick.cs" />
+    <Compile Include="CANSPIClick\CanSpiClick.cs" />
+    <Compile Include="CapSenseClick\CapSenseClick.cs" />
+    <Compile Include="CapSenseClick\CapSenseClickEvents.cs" />
+    <Compile Include="CapSenseClick\Registers.cs" />
+    <Compile Include="ColorClick\ColorClick.cs" />
+    <Compile Include="ColorClick\ColorClickEvents.cs" />
+    <Compile Include="ColorClick\Registers.cs" />
+    <Compile Include="DacClick\DacClick.cs" />
+    <Compile Include="DCMotor4Click\DCMotor4Click.cs" />
+    <Compile Include="DCMotorClick\DCMotorClick.cs" />
+    <Compile Include="DevantechLCD03\DevantechLCD03.cs" />
+    <Compile Include="DigiPotClick\DigiPot.cs" />
+    <Compile Include="DS18B20\DS18B20.cs" />
+    <Compile Include="EepromClick\EepromClick.cs" />
+    <Compile Include="EnvironmentClick\EnvironmentClick.cs" />
+    <Compile Include="FlashMemory\FlashMemory.cs" />
+    <Compile Include="FMClick\FMClick.cs" />
+    <Compile Include="FRamClick\FRAMClick.cs" />
+    <Compile Include="FTDIClick\FTDIClick.cs" />
+    <Compile Include="FTDIClick\FTDIClickEvents.cs" />
+    <Compile Include="Gnss4Click\Gnss4Click.cs" />
+    <Compile Include="Gnss5Click\Gnss5Click.cs" />
+    <Compile Include="GNSSClick\GNSSClick.cs" />
+    <Compile Include="GnssZoeClick\GnssZoeClick.cs" />
+    <Compile Include="GPS2Click\GPS2Click.cs" />
+    <Compile Include="GPSUtilities\GPSUtilities.cs" />
+    <Compile Include="HDC1000Click\HDC1000Click.cs" />
+    <Compile Include="HT16K33\HT16K33.cs" />
+    <Compile Include="HTU21DClick\HTU21DClick.cs" />
+    <Compile Include="I2cMux2Click\I2cMux2Click.cs" />
+    <Compile Include="I2cMux2Click\I2cMux2ClickEvents.cs" />
+    <Compile Include="I2cMuxClick\I2cMuxClick.cs" />
+    <Compile Include="IlluminanceClick\IlluminanceClick.cs" />
+    <Compile Include="IRThermoClick\IRThermoClick.cs" />
+    <Compile Include="JoystickClick\JoystickClick.cs" />
+    <Compile Include="JoystickClick\JoystickClickRegisters.cs" />
+    <Compile Include="Keypad4x3\Keypad4x3.cs" />
+    <Compile Include="Keypad4x3\Keypad4x3Events.cs" />
+    <Compile Include="Led8x8Click\Led8x8Click.cs" />
+    <Compile Include="Led8x8Click\Registers.cs" />
+    <Compile Include="LedRingClick\LedRingClick.cs" />
+    <Compile Include="LightClick\LightClick.cs" />
+    <Compile Include="NMEAParser\NMEAParser.cs" />
+    <!--This should be part of GPS driver sub dir?-->
+    <Compile Include="NRF-CClick\Bits.cs" />
+    <Compile Include="NRF-CClick\Commands.cs" />
+    <Compile Include="NRF-CClick\NRFcClick.cs" />
+    <Compile Include="NRF-CClick\Registers.cs" />
+    <!--Oled-CClick needs more work!-->
+    <!--
+    <Compile Include="Oled-CClick\FontManager.cs" /> 
+    <Compile Include="Oled-CClick\Geometry.cs" />
+    <Compile Include="Oled-CClick\KnownColors.cs" />
+    <Compile Include="Oled-CClick\MikroBitmap.cs" />
+    <Compile Include="Oled-CClick\MikroColor.cs" /> 
+    <Compile Include="Oled-CClick\MikroFont.cs" />
+    <Compile Include="Oled-CClick\MikroFontFiles.cs" />
+    <Compile Include="Oled-CClick\OLEDCClick.cs" />
+    -->
+    <Compile Include="Pressure4Click\Pressure4Click.cs" />
+    <Compile Include="Pressure9Click\Pressure9Click.cs" />
+    <Compile Include="Pressure11Click\Pressure11Click.cs" />
+    <Compile Include="PressureClick\PressureClick.cs" />
+    <Compile Include="PressureClick\Registers.cs" />
+    <Compile Include="Proximity3Click\Proximity3Click.cs" />
+    <Compile Include="ProximityClick\ProximityClick.cs" />
+    <Compile Include="ProximityClick\Registers.cs" />
+    <!--<Compile Include="QspiMemory\QspiMemory.cs" />-->
+    <!--External storage not yet available in nanoFramework-->
+    <Compile Include="RelayClick\RelayClick.cs" />
+    <Compile Include="RFIDClick\RFIDClick.cs" />
+    <Compile Include="RFIDClick\RFIDClickEvents.cs" />
+    <Compile Include="RotaryClick\RotaryClick.cs" />
+    <Compile Include="RotaryClick\RotaryClickEvents.cs" />
+    <Compile Include="RTC3Click\RTC3Click.cs" />
+    <Compile Include="RTDClick\RTDClick.cs" />
+    <Compile Include="SerialListener\SerialListener.cs" />
+    <!--Seperate proj, as not a click? -->
+    <Compile Include="SevenSegClick\SevenSegClick.cs" />
+    <Compile Include="SpeakUpClick\SpeakUpClick.cs" />
+    <Compile Include="SpeakUpClick\SpeakUpClickEvents.cs" />
+    <Compile Include="StepperClick\StepperClick.cs" />
+    <Compile Include="TempHum2Click\TempHum2Click.cs" />
+    <Compile Include="TempHum4Click\TempHum4Click.cs" />
+    <Compile Include="TempHum6Click\TempHum6.cs" />
+    <Compile Include="TempHum7Click\TempHum7Click.cs" />
+    <Compile Include="TempHum8Click\TempHum8Click.cs" />
+    <Compile Include="TempHum9Click\TempHum9Click.cs" />
+    <Compile Include="TempHum10Click\TempHum10Click.cs" />
+    <Compile Include="TempHum11Click\TempHum11Click.cs" />
+    <Compile Include="TempHumClick\TempHumClick.cs" />
+    <Compile Include="Thermo2Click\Thermo2Click.cs" />
+    <Compile Include="Thermo4Click\Thermo4Click.cs" />
+    <Compile Include="Thermostat2Click\Thermostat2Click.cs" />
+    <Compile Include="ThermostatClick\ThermostatClick.cs" />
+    <Compile Include="ThunderClick\ThunderClick.cs" />
+    <Compile Include="ThunderClick\ThunderClickEvents.cs" />
+    <!--TinyFileSystemneeds more work!-->
+    <!--
+    <Compile Include="TinyFileSystem\BlockDriver.cs" />
+    <Compile Include="TinyFileSystem\BufferedStream.cs" />
+    <Compile Include="TinyFileSystem\FileSystemStructures.cs" />
+    <Compile Include="TinyFileSystem\IBlockDriver.cs" />
+    <Compile Include="TinyFileSystem\StringTable.cs" />
+    <Compile Include="TinyFileSystem\TinyFileStream.cs" />
+    <Compile Include="TinyFileSystem\TinyFileSystem.cs" />
+    <Compile Include="TinyFileSystem\TinyFileSystemException.cs" />
+    <Compile Include="TinyFileSystem\UInt16Array.cs" />
+    <Compile Include="TinyFileSystem\Utilities.cs" />
+    -->
+    <Compile Include="UniHallClick\UniHallClick.cs" />
+    <Compile Include="UniqueIDClick\UniqueIDClick.cs" />
+    <!--UsbUartClick more work!-->
+    <Compile Include="UsbUartClick\SimpleSerial.cs" />
+    <Compile Include="UsbUartClick\USBUARTClick.cs" />
+    <Compile Include="UT-X-7SegClick\Ut7SegClick.cs" />
+    <Compile Include="WeatherClick\WeatherClick.cs" />
+    <Compile Include="..\MBNCore\MBNCore.cs" />
+    <!--This should be a seperate proj?-->
+    <Compile Include="..\MBNCore\nfHardwareSTM32F769I.cs" />
+    <!-- Make this an interface?-->
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib">
+      <HintPath>..\packages\nanoFramework.CoreLibrary.1.12.0-preview.9\lib\mscorlib.dll</HintPath>
+    </Reference>
+    <Reference Include="nanoFramework.Device.OneWire">
+      <HintPath>..\packages\nanoFramework.Device.OneWire.1.3.4-preview.13\lib\nanoFramework.Device.OneWire.dll</HintPath>
+    </Reference>
+    <Reference Include="nanoFramework.Graphics">
+      <HintPath>..\packages\nanoFramework.Graphics.1.0.2-preview.12\lib\nanoFramework.Graphics.dll</HintPath>
+    </Reference>
+    <Reference Include="nanoFramework.ResourceManager">
+      <HintPath>..\packages\nanoFramework.ResourceManager.1.1.4-preview.8\lib\nanoFramework.ResourceManager.dll</HintPath>
+    </Reference>
+    <Reference Include="nanoFramework.Runtime.Events">
+      <HintPath>..\packages\nanoFramework.Runtime.Events.1.10.0-preview.8\lib\nanoFramework.Runtime.Events.dll</HintPath>
+    </Reference>
+    <Reference Include="nanoFramework.Runtime.Native">
+      <HintPath>..\packages\nanoFramework.Runtime.Native.1.5.4-preview.5\lib\nanoFramework.Runtime.Native.dll</HintPath>
+    </Reference>
+    <Reference Include="nanoFramework.System.Collections">
+      <HintPath>..\packages\nanoFramework.System.Collections.1.4.0-preview.16\lib\nanoFramework.System.Collections.dll</HintPath>
+    </Reference>
+    <Reference Include="nanoFramework.System.Text">
+      <HintPath>..\packages\nanoFramework.System.Text.1.1.3-preview.15\lib\nanoFramework.System.Text.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Device.Gpio">
+      <HintPath>..\packages\nanoFramework.System.Device.Gpio.1.0.3-preview.14\lib\System.Device.Gpio.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Device.I2c">
+      <HintPath>..\packages\nanoFramework.System.Device.I2c.1.0.3-preview.8\lib\System.Device.I2c.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Device.Spi">
+      <HintPath>..\packages\nanoFramework.System.Device.Spi.1.0.4-preview.3\lib\System.Device.Spi.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Math">
+      <HintPath>..\packages\nanoFramework.System.Math.1.4.4-preview.15\lib\System.Math.dll</HintPath>
+    </Reference>
+    <Reference Include="Windows.Devices.Adc">
+      <HintPath>..\packages\nanoFramework.Windows.Devices.Adc.1.5.3-preview.9\lib\Windows.Devices.Adc.dll</HintPath>
+    </Reference>
+    <Reference Include="Windows.Devices.Pwm">
+      <HintPath>..\packages\nanoFramework.Windows.Devices.Pwm.1.6.2-preview.6\lib\Windows.Devices.Pwm.dll</HintPath>
+    </Reference>
+    <Reference Include="Windows.Devices.SerialCommunication">
+      <HintPath>..\packages\nanoFramework.Windows.Devices.SerialCommunication.1.3.6-preview.30\lib\Windows.Devices.SerialCommunication.dll</HintPath>
+    </Reference>
+    <Reference Include="Windows.Storage.Streams">
+      <HintPath>..\packages\nanoFramework.Windows.Storage.Streams.1.12.4-preview.16\lib\Windows.Storage.Streams.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.CSharp.targets" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.CSharp.targets')" />
+  <ProjectExtensions>
+    <ProjectCapabilities>
+      <ProjectConfigurationsDeclaredAsItems />
+    </ProjectCapabilities>
+  </ProjectExtensions>
+</Project>

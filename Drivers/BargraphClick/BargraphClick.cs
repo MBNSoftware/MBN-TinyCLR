@@ -11,8 +11,15 @@
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
+#if (NANOFRAMEWORK_1_0)
+using Windows.Devices.Pwm;
+using System.Device.Spi;
+#else
+using GHIElectronics.TinyCLR.Devices.Gpio;
 using GHIElectronics.TinyCLR.Devices.Pwm;
 using GHIElectronics.TinyCLR.Devices.Spi;
+#endif
+
 using System;
 
 namespace MBN.Modules
@@ -63,7 +70,11 @@ namespace MBN.Modules
     {
         private readonly SpiDevice _bargraph;                // SPI configuration
         private Double _pwmLevel;                            // Brightness level
+#if (NANOFRAMEWORK_1_0)
+        private readonly PwmPin _pwm;                    // Brightness control
+#else
         private readonly PwmChannel _pwm;                    // Brightness control
+#endif
         private readonly Byte[] _data = new byte[2];
         private UInt16 _value;
         private readonly Hardware.Socket _socket;
@@ -77,18 +88,29 @@ namespace MBN.Modules
         {
             _socket = socket;
             // Initialize SPI
-            _bargraph = SpiController.FromName(socket.SpiBus).GetDevice(new SpiConnectionSettings()
+#if (NANOFRAMEWORK_1_0)
+            _bargraph = SpiDevice.Create(new SpiConnectionSettings(socket.SpiBus, socket.Cs)
             {
-                ChipSelectType = SpiChipSelectType.Gpio,
-                ChipSelectLine = GHIElectronics.TinyCLR.Devices.Gpio.GpioController.GetDefault().OpenPin(socket.Cs),
                 Mode = SpiMode.Mode0,
                 ClockFrequency = 2000000
             });
-
+            // Initialize PWM and set initial brightness
+            var PWM = PwmController.FromId(socket.PwmController);
+            PWM.SetDesiredFrequency(5000);
+            _pwm = PWM.OpenPin(socket.PwmChannel);
+#else
+            _bargraph = SpiController.FromName(socket.SpiBus).GetDevice(new SpiConnectionSettings()
+            {
+                ChipSelectType = SpiChipSelectType.Gpio,
+                ChipSelectLine = GpioController.GetDefault().OpenPin(socket.Cs),
+                Mode = SpiMode.Mode0,
+                ClockFrequency = 2000000
+            });
             // Initialize PWM and set initial brightness
             var PWM = PwmController.FromName(socket.PwmController);
             PWM.SetDesiredFrequency(5000);
             _pwm = PWM.OpenChannel(socket.PwmChannel);
+#endif
             _pwm.SetActiveDutyCyclePercentage(initialBrightness);
             _pwm.Start();
         }

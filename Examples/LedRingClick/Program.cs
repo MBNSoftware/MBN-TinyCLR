@@ -4,7 +4,11 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using static System.Diagnostics.Debug;
+#if (NANOFRAMEWORK_1_0)
+gpio = System.Device.Gpio;
+#else
 using gpio = GHIElectronics.TinyCLR.Devices.Gpio;
+#endif
 
 namespace Examples
 {
@@ -39,7 +43,11 @@ namespace Examples
             {
                 while (true)
                 {
+#if (NANOFRAMEWORK_1_0)
+                    Hardware.Led3.Write(gpio.PinValue.High ^ Hardware.Led3.Read());
+#else
                     Hardware.Led3.Write(gpio.GpioPinValue.High ^ Hardware.Led3.Read());
+#endif
                     Thread.Sleep(100);
                 }
             }

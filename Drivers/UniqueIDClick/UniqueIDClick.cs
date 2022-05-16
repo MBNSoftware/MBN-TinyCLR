@@ -10,8 +10,11 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
-
-using GHIElectronics.TinyCLR.Devices.Onewire;
+#if (NANOFRAMEWORK_1_0)
+using nanoFramework.Device.OneWire;
+#else
+using GHIElectronics.TinyCLR.Devices.OneWire;
+#endif
 
 using System;
 using System.Collections;
@@ -76,7 +79,11 @@ namespace MBN.Modules
         /// <param name="gpio">The pin to use as the One-wire port. </param>
         public UniqueIDClick(Hardware.Socket socket, GpioSelect gpio)
         {
+#if (NANOFRAMEWORK_1_0)
+            _interface = new OneWireHost();
+#else
             _interface = new OneWireController(gpio == GpioSelect.GP0 ? socket.PwmPin : socket.AnPin);
+#endif
 
             _deviceList = new ArrayList();
             _deviceList = GetDeviceList();
@@ -84,22 +91,26 @@ namespace MBN.Modules
             if (_deviceList.Count == 0) throw new DeviceInitialisationException("UniqueID Click not found on the OneWire Bus.");
         }
 
-        #endregion
+#endregion
 
-        #region Fields
+#region Fields
 
         private static ArrayList _deviceList;
+#if (NANOFRAMEWORK_1_0)
+        private static OneWireHost _interface;
+#else
         private static OneWireController _interface;
+#endif
 
-        #endregion
+#endregion
 
-        #region Constants
+#region Constants
 
         private const Byte DeviceFamilyCode = 0x01;
 
-        #endregion
+#endregion
 
-        #region Public ENUMS
+#region Public ENUMS
 
         /// <summary>
         ///     Jumper position on JP1 for GPIO Pin selection for the One-Wire bus.
@@ -117,9 +128,9 @@ namespace MBN.Modules
             GP1
         }
 
-        #endregion
+#endregion
 
-        #region Private Methods
+#region Private Methods
 
         private static Byte CalculateCrc(Byte[] data, Int32 length)
         {
@@ -147,7 +158,11 @@ namespace MBN.Modules
         /// <summary>
         ///     Exposes the native TinyCLR 1-Wire Bus.
         /// </summary>
+#if (NANOFRAMEWORK_1_0)
+        public OneWireHost Interface => _interface;
+#else
         public OneWireController Interface => _interface;
+#endif
 
         /// <summary>
         ///     Returns an ArrayList of the unique 64-Bit Addresses of all UniqueID Clicks on the One-Wire Bus.
@@ -184,9 +199,9 @@ namespace MBN.Modules
             return _deviceList.Count;
         }
 
-        #endregion
+#endregion
 
-        #region Pubic Methods
+#region Pubic Methods
 
         /// <summary>
         ///     Returns an ArrayList of all DS2401 sensors on the OneWire Bus.
@@ -246,7 +261,7 @@ namespace MBN.Modules
             while (enumerator.MoveNext())
             {
                 Byte[] de = (Byte[]) enumerator.Current;
-                if (de != null && BitConverter.ToInt64(de, 0) == BitConverter.ToInt64(id, 0)) return true;
+                if (de != null && System.BitConverter.ToInt64(de, 0) == System.BitConverter.ToInt64(id, 0)) return true;
             }
 
             return false;
@@ -275,7 +290,7 @@ namespace MBN.Modules
         /// </example>
         public Int64 GetSerialNumber(Byte[] oneWireAddress)
         {
-            return BitConverter.ToInt32(new[] {oneWireAddress[1], oneWireAddress[2], oneWireAddress[3], oneWireAddress[4], oneWireAddress[5]}, 0);
+            return System.BitConverter.ToInt32(new[] {oneWireAddress[1], oneWireAddress[2], oneWireAddress[3], oneWireAddress[4], oneWireAddress[5]}, 0);
         }
 
         /// <summary>
@@ -301,45 +316,49 @@ namespace MBN.Modules
         /// </example>
         public Byte[] SerialNumberToOneWireAddress(Int64 serialNumber)
         {
-            var sn = Utility.CombineArrays(new[] {DeviceFamilyCode}, Utility.ExtractRangeFromArray(BitConverter.GetBytes(serialNumber), 0, 6));
+            var sn = Utility.CombineArrays(new[] {DeviceFamilyCode}, Utility.ExtractRangeFromArray(System.BitConverter.GetBytes(serialNumber), 0, 6));
             return Utility.CombineArrays(sn, new[] {CalculateCrc(sn, 7)});
         }
 
-        #endregion
+#endregion
     }
 
+#if (NANOFRAMEWORK_1_0)
+    //This class is already in Thermo2Click, so we will just use that (should really split it out to generic location.)
+#else
     internal class Utility
     {
-        internal static Byte[] CombineArrays(Byte[] firstByteArray, Byte[] secondByteArray)
-        {
-            Byte[] combinedArray = new Byte[secondByteArray.Length + firstByteArray.Length];
-            Array.Copy(firstByteArray, 0, combinedArray, 0, firstByteArray.Length);
-            Array.Copy(secondByteArray, 0, combinedArray, firstByteArray.Length, secondByteArray.Length);
-            return combinedArray;
-        }
+       internal static Byte[] CombineArrays(Byte[] firstByteArray, Byte[] secondByteArray)
+       {
+           Byte[] combinedArray = new Byte[secondByteArray.Length + firstByteArray.Length];
+           Array.Copy(firstByteArray, 0, combinedArray, 0, firstByteArray.Length);
+           Array.Copy(secondByteArray, 0, combinedArray, firstByteArray.Length, secondByteArray.Length);
+           return combinedArray;
+       }
 
-        internal static Byte[] CombineArrays(Byte[] firstByteArray, Int32 offset1, Int32 count1, Byte[] secondByteArray, Int32 offset2, Int32 count2)
-        {
-            Byte[] combinedArray = new Byte[count1 + count2];
-            for (Int32 i = 0; i < count1; i++)
-            {
-                combinedArray[i] = firstByteArray[offset1 + i];
-            }
+       internal static Byte[] CombineArrays(Byte[] firstByteArray, Int32 offset1, Int32 count1, Byte[] secondByteArray, Int32 offset2, Int32 count2)
+       {
+           Byte[] combinedArray = new Byte[count1 + count2];
+           for (Int32 i = 0; i < count1; i++)
+           {
+               combinedArray[i] = firstByteArray[offset1 + i];
+           }
 
-            for (Int32 i = 0; i < count2; i++)
-            {
-                combinedArray[count1 + i] = secondByteArray[offset2 + i];
-            }
+           for (Int32 i = 0; i < count2; i++)
+           {
+               combinedArray[count1 + i] = secondByteArray[offset2 + i];
+           }
 
-            return combinedArray;
-        }
+           return combinedArray;
+       }
 
-        internal static Byte[] ExtractRangeFromArray(Byte[] source, Int32 offset, Int32 length)
-        {
-            Byte[] result = new Byte[length];
-            Array.Copy(source, offset, result, 0, length);
-            return result;
-        }
+       internal static Byte[] ExtractRangeFromArray(Byte[] source, Int32 offset, Int32 length)
+       {
+           Byte[] result = new Byte[length];
+           Array.Copy(source, offset, result, 0, length);
+           return result;
+       }
     }
+#endif
 
 }

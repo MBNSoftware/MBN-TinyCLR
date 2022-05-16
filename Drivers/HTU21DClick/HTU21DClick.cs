@@ -11,7 +11,11 @@
  * 
  */
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.I2c;
+#else
 using GHIElectronics.TinyCLR.Devices.I2c;
+#endif
 
 using System;
 using System.Threading;
@@ -65,8 +69,12 @@ namespace MBN.Modules
         public HTU21DClick(Hardware.Socket socket)
         {
             _socket = socket;
+#if (NANOFRAMEWORK_1_0)
+            _htu = I2cDevice.Create(new I2cConnectionSettings(socket.I2cBus, HTDU21D_WRITE_ADDRESS, I2cBusSpeed.FastMode));
+#else
             _htu = I2cController.FromName(socket.I2cBus)
                 .GetDevice(new I2cConnectionSettings(HTDU21D_WRITE_ADDRESS, 400000));
+#endif
 
             Reset(ResetModes.Soft);
         }

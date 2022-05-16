@@ -13,8 +13,12 @@
 
 using System;
 
+#if (NANOFRAMEWORK_1_0)
+namespace nanoFramework.Presentation.Media
+#else
 // ReSharper disable once CheckNamespace
 namespace Microsoft.SPOT.Presentation.Media
+#endif
 {
 	/// <summary>
 	/// An abstract class with support for the RGB 565 Color format.
@@ -22,7 +26,7 @@ namespace Microsoft.SPOT.Presentation.Media
 	public class MikroColor
 	{
 
-		#region Fields
+#region Fields
 
 		/// <summary>
 		/// The Blue component value
@@ -84,9 +88,9 @@ namespace Microsoft.SPOT.Presentation.Media
 		/// </example>
 		public readonly UInt16 Value;
 
-		#endregion
+#endregion
 
-		#region Constructors
+#region Constructors
 
 		/// <summary>
 		/// Creates a new <see cref="MikroColor"/> by RGB (8-8-8) component values
@@ -132,9 +136,9 @@ namespace Microsoft.SPOT.Presentation.Media
 			Value = value;
 		}
 
-		#endregion
+#endregion
 
-		#region Public Methods
+#region Public Methods
 
 		/// <summary>
 		/// Returns the string representation of the <see cref="MikroColor"/>.
@@ -155,7 +159,7 @@ namespace Microsoft.SPOT.Presentation.Media
 			return "{" + R + ", " + G + ", " + B + "}";
 		}
 
-		#endregion
+#endregion
 
 	}
 }

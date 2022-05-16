@@ -11,7 +11,13 @@
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.Spi;
+#else
 using GHIElectronics.TinyCLR.Devices.Spi;
+using GHIElectronics.TinyCLR.Devices.Gpio;
+#endif
+
 using System;
 using System.Threading;
 
@@ -34,13 +40,21 @@ namespace MBN.Modules
         /// <param name="socket">The socket on which the module is plugged.</param>
         public T4_20mAClick(Hardware.Socket socket)
         {
-            _trs = SpiController.FromName(socket.SpiBus).GetDevice(new SpiConnectionSettings()
+#if (NANOFRAMEWORK_1_0)
+            _trs = SpiDevice.Create(new SpiConnectionSettings(socket.SpiBus, socket.Cs)
             {
-                ChipSelectType = SpiChipSelectType.Gpio,
-                ChipSelectLine = GHIElectronics.TinyCLR.Devices.Gpio.GpioController.GetDefault().OpenPin(socket.Cs),
                 Mode = SpiMode.Mode0,
                 ClockFrequency = 2000000
             });
+#else
+            _trs = SpiController.FromName(socket.SpiBus).GetDevice(new SpiConnectionSettings()
+            {
+                ChipSelectType = SpiChipSelectType.Gpio,
+                ChipSelectLine = GpioController.GetDefault().OpenPin(socket.Cs),
+                Mode = SpiMode.Mode0,
+                ClockFrequency = 2000000
+            });
+#endif
             _socket = socket;
         }
 
@@ -105,13 +119,21 @@ namespace MBN.Modules
         /// <param name="calibration20mA">The calibration value for 20mA.</param>
         public R4_20mAClick(Hardware.Socket socket, UInt16 calibration4mA, UInt16 calibration20mA)
         {
-            _rec = SpiController.FromName(socket.SpiBus).GetDevice(new SpiConnectionSettings()
+#if (NANOFRAMEWORK_1_0)
+            _rec = SpiDevice.Create(new SpiConnectionSettings(socket.SpiBus, socket.Cs)
             {
-                ChipSelectType = SpiChipSelectType.Gpio,
-                ChipSelectLine = GHIElectronics.TinyCLR.Devices.Gpio.GpioController.GetDefault().OpenPin(socket.Cs),
                 Mode = SpiMode.Mode0,
                 ClockFrequency = 2000000
             });
+#else
+            _rec = SpiController.FromName(socket.SpiBus).GetDevice(new SpiConnectionSettings()
+            {
+                ChipSelectType = SpiChipSelectType.Gpio,
+                ChipSelectLine = GpioController.GetDefault().OpenPin(socket.Cs),
+                Mode = SpiMode.Mode0,
+                ClockFrequency = 2000000
+            });
+#endif
             _socket = socket;
             _4mACalibration = calibration4mA;
             _20mACalibration = calibration20mA;

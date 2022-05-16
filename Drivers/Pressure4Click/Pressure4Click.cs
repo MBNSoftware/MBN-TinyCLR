@@ -13,11 +13,18 @@
 
 #region Usings
 
-using System;
-using System.Threading;
+#if (NANOFRAMEWORK_1_0)
+using System.Device.Gpio;
+using System.Device.I2c;
+using System.Device.Spi;
+#else
 using GHIElectronics.TinyCLR.Devices.Gpio;
 using GHIElectronics.TinyCLR.Devices.I2c;
 using GHIElectronics.TinyCLR.Devices.Spi;
+#endif
+
+using System;
+using System.Threading;
 
 #endregion
 
@@ -103,13 +110,21 @@ namespace MBN.Modules
             _socket = socket;
             _interface = Interface.SPI;
 
-            _sensorSPI = SpiController.FromName(socket.SpiBus).GetDevice(new SpiConnectionSettings
+#if (NANOFRAMEWORK_1_0)
+            _sensorSPI = SpiDevice.Create(new SpiConnectionSettings(socket.SpiBus, socket.Cs)
+            {
+                Mode = SpiMode.Mode0,
+                ClockFrequency = 8 * 1000 * 1000
+            });
+#else
+            _sensorSPI = SpiController.FromName(socket.SpiBus).GetDevice(new SpiConnectionSettings()
             {
                 ChipSelectType = SpiChipSelectType.Gpio,
                 ChipSelectLine = GpioController.GetDefault().OpenPin(socket.Cs),
                 Mode = SpiMode.Mode0,
                 ClockFrequency = 8 * 1000 * 1000
             });
+#endif
 
             Initialize();
         }
@@ -123,7 +138,11 @@ namespace MBN.Modules
         {
             _interface = Interface.I2C;
 
-            _sensorI2C = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings((Int32) slaveAddress, 400000));
+#if (NANOFRAMEWORK_1_0)
+            _sensorI2C = I2cDevice.Create(new I2cConnectionSettings(socket.I2cBus, (int)slaveAddress, I2cBusSpeed.FastMode));
+#else
+			_sensorI2C = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings((Int32) slaveAddress, 400000));
+#endif
 
             Initialize();
         }
@@ -826,7 +845,13 @@ namespace MBN.Modules
             {
                 lock (_socket.LockSpi)
                 {
+#if (NANOFRAMEWORK_1_0)
+                    _sensorSPI.WriteByte(registerAddress);
+                    _sensorSPI.Read(result);
+                    //_sensorSPI.TransferSequential(new[] { registerAddress }, result); //TODO: this might need reverting if the lib ever supports it!
+#else
                     _sensorSPI.TransferSequential(new[] { registerAddress }, result);
+#endif
                 }
             }
             else

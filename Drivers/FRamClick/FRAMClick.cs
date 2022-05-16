@@ -9,7 +9,13 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
+#if (NANOFRAMEWORK_1_0)
+using System.Device.Spi;
+#else
+using GHIElectronics.TinyCLR.Devices.Gpio;
 using GHIElectronics.TinyCLR.Devices.Spi;
+#endif
+
 using System;
 using System.Threading;
 
@@ -91,13 +97,21 @@ namespace MBN.Modules
         {
             _socket = socket;
             // Initialize SPI
-            _fram = SpiController.FromName(socket.SpiBus).GetDevice(new SpiConnectionSettings()
+#if (NANOFRAMEWORK_1_0)
+            _fram = SpiDevice.Create(new SpiConnectionSettings(socket.SpiBus, socket.Cs)
             {
-                ChipSelectType = SpiChipSelectType.Gpio,
-                ChipSelectLine = GHIElectronics.TinyCLR.Devices.Gpio.GpioController.GetDefault().OpenPin(socket.Cs),
                 Mode = SpiMode.Mode0,
                 ClockFrequency = 2000000
             });
+#else
+            _fram = SpiController.FromName(socket.SpiBus).GetDevice(new SpiConnectionSettings()
+            {
+                ChipSelectType = SpiChipSelectType.Gpio,
+                ChipSelectLine = GpioController.GetDefault().OpenPin(socket.Cs),
+                Mode = SpiMode.Mode0,
+                ClockFrequency = 2000000
+            });
+#endif
 
             WriteEnable();
         }
@@ -224,7 +238,11 @@ namespace MBN.Modules
                 Array.Copy(array, index + (i * PageSize), _dataPage, 3, length);
                 lock (_socket.LockSpi)
                 {
+#if (NANOFRAMEWORK_1_0)
+                    _fram.Write(_dataPage); //TODO: this might be wrong, but probably due to the Array.copy above.
+#else
                     _fram.TransferFullDuplex(_dataPage, 0, length + 3, null, 0, 0);
+#endif
                 }
                 while (WriteInProgress()) Thread.Sleep(1);
             }

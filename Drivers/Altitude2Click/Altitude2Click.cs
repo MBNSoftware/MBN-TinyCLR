@@ -14,7 +14,11 @@
 
 #region Usings
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.I2c;
+#else
 using GHIElectronics.TinyCLR.Devices.I2c;
+#endif
 
 using System;
 using System.Threading;
@@ -90,8 +94,11 @@ namespace MBN.Modules
         public Altitude2Click(Hardware.Socket socket, I2CAddress address)
         {
             _socket = socket;
+#if (NANOFRAMEWORK_1_0)
+            _sensor = I2cDevice.Create(new I2cConnectionSettings(socket.I2cBus, (int)address, I2cBusSpeed.StandardMode));
+#else
             _sensor = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings((Int32) address, 100000));
-
+#endif
             Reset();
 
             ReadCalibrationData();
@@ -102,17 +109,17 @@ namespace MBN.Modules
             PressureCompensationMode = PressureCompensationModes.SeaLevelCompensated;
         }
 
-        #endregion
+#endregion
 
-        #region Private Fields
+#region Private Fields
 
         private readonly I2cDevice _sensor;
         private readonly UInt32[] CalibrationData = new UInt32[8];
         private readonly Hardware.Socket _socket;
 
-        #endregion
+#endregion
 
-        #region Public ENUMS
+#region Public ENUMS
 
         /// <summary>
         ///     Possible I2C Slave Addresses for the Altitude 2 Click
@@ -161,9 +168,9 @@ namespace MBN.Modules
             ADC4096 = MS5607_CMD_ADC_4096
         }
 
-        #endregion
+#endregion
 
-        #region Constants
+#region Constants
 
         private const Byte MS5607_CMD_RESET = 0x1E; // Reset
         private const Byte MS5607_CMD_ADC_READ = 0x00; // Initiate read sequence
@@ -177,9 +184,9 @@ namespace MBN.Modules
         private const Byte MS5607_CMD_ADC_4096 = 0x08; // ADC oversampling ratio to 4096
         private const Byte MS5607_CMD_PROM_RD = 0xA0; // Read PROM registers
 
-        #endregion
+#endregion
 
-        #region Public Properties
+#region Public Properties
 
         /// <summary>
         /// Sets or gets the oversampling rate or resolution for pressure conversion.
@@ -233,9 +240,9 @@ namespace MBN.Modules
         /// </example>
         public TemperatureUnits TemperatureUnit { get; set; }
 
-        #endregion
+#endregion
 
-        #region Private Methods
+#region Private Methods
 
         private void WriteByte(Byte registerAddress)
         {
@@ -346,9 +353,9 @@ namespace MBN.Modules
             }
         }
 
-        #endregion
+#endregion
 
-        #region Public Methods
+#region Public Methods
 
         /// <summary>
         /// Trigger a pressure and temperature conversion.
@@ -380,19 +387,19 @@ namespace MBN.Modules
         /// End While
         /// </code>
         /// </example>
-        public void ReadSensor(out Single temperature, out Single pressure, out Single altitude)
+        public void ReadSensor(out float temperature, out float pressure, out float altitude)
         {
-            Single D2 = ReadADC(MS5607_CMD_ADC_D2, PressureOverSamplingRate);
-            Single D1 = ReadADC(MS5607_CMD_ADC_D1, TemperatureOverSamplingRate);
+            float D2 = ReadADC(MS5607_CMD_ADC_D2, PressureOverSamplingRate);
+            float D1 = ReadADC(MS5607_CMD_ADC_D1, TemperatureOverSamplingRate);
 
             // Calcualte 1st order pressure and temperature compensation
-            Single dT = (Single) (D2 - CalibrationData[5] * Math.Pow(2, 8));
-            Single OFF = (Single) (CalibrationData[2] * Math.Pow(2, 17) + dT * CalibrationData[4] / Math.Pow(2, 6));
-            Single SENS = (Single) (CalibrationData[1] * Math.Pow(2, 16) + dT * CalibrationData[3] / Math.Pow(2, 7));
+            float dT = (float) (D2 - CalibrationData[5] * Math.Pow(2.0, 8));
+            float OFF = (float) (CalibrationData[2] * Math.Pow(2.0, 17) + dT * CalibrationData[4] / Math.Pow(2.0, 6));
+            float SENS = (float) (CalibrationData[1] * Math.Pow(2.0, 16) + dT * CalibrationData[3] / Math.Pow(2.0, 7));
 
-            temperature = (Single) (2000 + dT * CalibrationData[6] / Math.Pow(2, 23)) / 100;
-            pressure = (Single) ((D1 * SENS / Math.Pow(2, 21) - OFF) / Math.Pow(2, 15));
-            altitude = (Single) (44330.77 * (1.0 - Math.Pow(pressure / CalculatePressureAsl(pressure), 0.1902663538687809)));
+            temperature = (float) (2000 + dT * CalibrationData[6] / Math.Pow(2.0, 23)) / 100;
+            pressure = (float) ((D1 * SENS / Math.Pow(2.0, 21) - OFF) / Math.Pow(2.0, 15));
+            altitude = (float) (44330.77 * (1.0 - Math.Pow(pressure / CalculatePressureAsl(pressure), 0.1902663538687809)));
 
             if (PressureCompensationMode == PressureCompensationModes.SeaLevelCompensated)
             {
@@ -406,8 +413,8 @@ namespace MBN.Modules
             }
 
             // Calculate 2nd order pressure and temperature compensation
-            Single T2 = (Single) (dT * dT / Math.Pow(2, 31));
-            Single OFF2 = (Single) (61 * (temperature - 2000) * (temperature - 2000) / Math.Pow(2, 4));
+            Single T2 = (Single) (dT * dT / Math.Pow(2.0, 31));
+            Single OFF2 = (Single) (61 * (temperature - 2000) * (temperature - 2000) / Math.Pow(2.0, 4));
             Single SENS2 = 2 * (temperature - 2000) * (temperature - 2000);
 
             if (temperature < -1500)
@@ -422,7 +429,7 @@ namespace MBN.Modules
             temperature -= T2;
             temperature = ScaleTemperature(temperature);
 
-            pressure = (Single) ((D1 * SENS / Math.Pow(2, 21) - OFF) / Math.Pow(2, 15));
+            pressure = (Single) ((D1 * SENS / Math.Pow(2.0, 21) - OFF) / Math.Pow(2.0, 15));
 
             if (PressureCompensationMode == PressureCompensationModes.SeaLevelCompensated)
             {
@@ -440,9 +447,9 @@ namespace MBN.Modules
             return true;
         }
 
-        #endregion
+#endregion
 
-        #region Interface Implementations
+#region Interface Implementations
 
         /// <inheritdoc />
         /// <summary>Reads the temperature.</summary>
@@ -484,6 +491,6 @@ namespace MBN.Modules
             throw new NotSupportedException(
                 "Reading raw data is not supported by this module or implemented in this driver.");
 
-        #endregion
+#endregion
     }
 }

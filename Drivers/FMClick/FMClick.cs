@@ -10,8 +10,14 @@
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.Gpio;
+using System.Device.I2c;
+#else
 using GHIElectronics.TinyCLR.Devices.Gpio;
 using GHIElectronics.TinyCLR.Devices.I2c;
+#endif
+
 using System;
 using System.Threading;
 
@@ -268,15 +274,21 @@ namespace MBN.Modules
         /// Initializes a new instance of the <see cref="FMClick"/> class.
         /// </summary>
         /// <param name="socket">The socket that this module is plugged in to.</param>
-        public FMClick(Hardware.Socket socket, Spacing spacing = Spacing.UsaAustralia, Band band=Band.UsaEurope)
+        public FMClick(Hardware.Socket socket, Spacing spacing = Spacing.UsaAustralia, Band band=Band.UsaEurope, int address = 0x10)
         {
             _socket = socket;
             // Create the driver's I²C configuration
-            _fm = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings(0x10, 400000));
-
+#if (NANOFRAMEWORK_1_0)
+            _fm = I2cDevice.Create(new I2cConnectionSettings(socket.I2cBus, address, I2cBusSpeed.FastMode));
+            _resetPin = new GpioController().OpenPin(socket.Rst);
+            _resetPin.SetPinMode(PinMode.Output);
+            _resetPin.Write(PinValue.Low);
+#else
+            _fm = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings(address, 400000));
             _resetPin = GpioController.GetDefault().OpenPin(socket.Rst);
             _resetPin.SetDriveMode(GpioPinDriveMode.Output);
             _resetPin.Write(GpioPinValue.Low);
+#endif
 
             PowerUp();
 
@@ -295,7 +307,11 @@ namespace MBN.Modules
 
         private void PowerUp()
         {
+#if (NANOFRAMEWORK_1_0)
+            if (_resetPin.Read() == PinValue.Low) _resetPin.Write(PinValue.High);
+#else
             if (_resetPin.Read() == GpioPinValue.Low) _resetPin.Write(GpioPinValue.High);
+#endif
 
             ReadRegisters();
 
@@ -585,9 +601,9 @@ namespace MBN.Modules
         // ReSharper disable once FunctionNeverReturns
         }
 
-        #endregion
+#endregion
 
-        #region Public Properties
+#region Public Properties
 
         /// <summary>
         /// Gets the ChannelSpacing that the FMClick is programmed for.
@@ -819,9 +835,9 @@ namespace MBN.Modules
             }
         }
 
-        #endregion
+#endregion
 
-        #region Public Constants
+#region Public Constants
 
         /// <summary>
         ///     The Station returned by <see cref="Seek" /> when no Station is found during a seek or scan operation.
@@ -854,9 +870,9 @@ namespace MBN.Modules
         /// </example>
         public const Int32 MaxVolume = 15;
 
-        #endregion
+#endregion
 
-        #region Public Methods
+#region Public Methods
 
         /// <summary>
         /// Decreases the Volume by one.
@@ -913,7 +929,12 @@ namespace MBN.Modules
         {
             if (resetMode == ResetModes.Soft) throw new NotImplementedException("ResetModes.Soft not implemented for this module. Use ResetModes.Hard to reset this module.");
 
+#if (NANOFRAMEWORK_1_0)
+            _resetPin.Write(PinValue.Low);
+#else
             _resetPin.Write(GpioPinValue.Low);
+#endif
+
             Thread.Sleep(10);
 
             ReadRegisters();
@@ -1028,9 +1049,9 @@ namespace MBN.Modules
             UpdateRegisters();
         }
 
-        #endregion
+#endregion
 
-        #region Events
+#region Events
 
         /// <summary>
         /// Represents the delegate that is used to handle the <see cref="RadioTextChanged"/> event.
@@ -1052,7 +1073,7 @@ namespace MBN.Modules
             RadioTextChanged?.Invoke(sender, newRadioText);
         }
 
-        #endregion
+#endregion
 
     }
 }

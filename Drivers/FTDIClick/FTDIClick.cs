@@ -12,7 +12,13 @@
  */
 
 
+#if (NANOFRAMEWORK_1_0)
+using Windows.Devices.SerialCommunication;
+using Windows.Storage.Streams;
+#else
 using GHIElectronics.TinyCLR.Devices.Uart;
+#endif
+
 using System;
 
 namespace MBN.Modules
@@ -100,7 +106,11 @@ namespace MBN.Modules
         /// </example>
         public event DataReceivedEventHandler DataReceived = delegate { };
 
+#if (NANOFRAMEWORK_1_0)
+        private readonly SerialDevice _sp;
+#else
         private readonly UartController _sp;
+#endif
         private Boolean _listening;
 
         /// <summary>
@@ -111,21 +121,49 @@ namespace MBN.Modules
         /// <param name="parity">The parity.</param>
         /// <param name="dataBits">The data bits.</param>
         /// <param name="stopBits">The stop bits.</param>
+#if (NANOFRAMEWORK_1_0)
+        public FTDIClick(Hardware.Socket socket, uint baudRate = 9600, SerialParity parity = SerialParity.None, ushort dataBits = 8, SerialStopBitCount stopBits = SerialStopBitCount.One)
+        {
+            _sp = SerialDevice.FromId(socket.ComPort);
+            // set parameters
+            _sp.BaudRate = baudRate;
+            _sp.DataBits = dataBits;
+            _sp.Parity = parity;
+            _sp.StopBits = stopBits;
+            _sp.Handshake = SerialHandshake.None;
+#else
         public FTDIClick(Hardware.Socket socket, Int32 baudRate = 9600, UartParity parity = UartParity.None, Int32 dataBits = 8, UartStopBitCount stopBits = UartStopBitCount.One)
         {
             _sp = UartController.FromName(socket.ComPort);
             _sp.SetActiveSettings(new UartSetting() { BaudRate = baudRate, DataBits = dataBits, Parity = parity, StopBits = stopBits, Handshaking = UartHandshake.None });
             _sp.Enable();
+#endif
         }
 
+#if (NANOFRAMEWORK_1_0)
+        private void Sp_DataReceived(object sender, Windows.Devices.SerialCommunication.SerialDataReceivedEventArgs e)
+#else
         private void Sp_DataReceived(UartController sender, GHIElectronics.TinyCLR.Devices.Uart.DataReceivedEventArgs e)
+#endif
         {
+#if (NANOFRAMEWORK_1_0)
+            using (DataReader dataReader = new DataReader(_sp.InputStream))
+            {
+                dataReader.InputStreamOptions = InputStreamOptions.Partial;
+                var nb = dataReader.Load(_sp.BytesToRead);
+                var buf = new byte[nb];
+                dataReader.ReadBytes(buf);
+
+                DataReceivedEventHandler tempEvent = DataReceived;
+                tempEvent(this, new DataReceivedEventArgs(buf, (int)nb));
+            }
+#else
             var nb = _sp.BytesToRead;
             var buf = new Byte[nb];
-
             _sp.Read(buf, 0, nb);
             DataReceivedEventHandler tempEvent = DataReceived;
             tempEvent(this, new DataReceivedEventArgs(buf, nb));
+#endif
         }
 
         /// <summary>
@@ -151,7 +189,18 @@ namespace MBN.Modules
         ///         }
         /// </code>
         /// </example>
-        public void SendData(Byte[] data) => _sp.Write(data, 0, data.Length);
+#if (NANOFRAMEWORK_1_0)
+        public void SendData(byte[] data)
+        {
+            using (DataWriter outputDataWriter = new DataWriter(_sp.OutputStream))
+            {
+                outputDataWriter.WriteBytes(data);
+                outputDataWriter.Store();
+            }
+        }
+#else
+       public void SendData(Byte[] data) => _sp.Write(data, 0, data.Length);
+#endif
 
         /// <summary>
         /// Gets or sets a value indicating whether this <see cref="FTDIClick"/> is listening on the serial port

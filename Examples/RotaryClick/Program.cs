@@ -1,4 +1,9 @@
-﻿using GHIElectronics.TinyCLR.Devices.Gpio;
+﻿#if (NANOFRAMEWORK_1_0)
+using System.Device.Gpio;
+#else
+using GHIElectronics.TinyCLR.Devices.I2c;
+#endif
+
 using MBN;
 using MBN.Modules;
 using System;

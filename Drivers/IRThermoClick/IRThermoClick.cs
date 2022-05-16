@@ -11,7 +11,12 @@
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.I2c;
+#else
 using GHIElectronics.TinyCLR.Devices.I2c;
+#endif
+
 using System;
 
 namespace MBN.Modules
@@ -51,7 +56,11 @@ namespace MBN.Modules
         public IRThermoClick(Hardware.Socket socket, Byte address = 0x5A)
         {
             _socket = socket;
-            _ir = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings(address, 100000));
+#if (NANOFRAMEWORK_1_0)
+            _ir = I2cDevice.Create(new I2cConnectionSettings(socket.I2cBus, address, I2cBusSpeed.StandardMode));
+#else
+			_ir = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings(address, 100000));
+#endif
         }
 
         /// <summary>

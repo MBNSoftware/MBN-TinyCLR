@@ -14,11 +14,16 @@
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.Gpio;
+using System.Device.I2c;
+#else
+using GHIElectronics.TinyCLR.Devices.Gpio;
 using GHIElectronics.TinyCLR.Devices.I2c;
+#endif
 
 using System;
 using System.Threading;
-using GHIElectronics.TinyCLR.Devices.Gpio;
 
 // ReSharper disable once CheckNamespace
 namespace MBN.Modules
@@ -75,14 +80,22 @@ namespace MBN.Modules
         /// </summary>
         /// <param name="socket">The socket that the BMP085 Module is connected into.</param>
         /// <param name="dataReadyPin">The pin used to signal conversion complete.</param>
-        public BMP085(Hardware.Socket socket, Int32 dataReadyPin)
+        public BMP085(Hardware.Socket socket, Int32 dataReadyPin, Int32 address = 0x77)
         {
             _socket = socket;
             // Create the driver's I²C configuration
-            _sensor = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings(0x77, 100000));
+#if (NANOFRAMEWORK_1_0)
+            _sensor = I2cDevice.Create(new I2cConnectionSettings(socket.I2cBus, address, I2cBusSpeed.StandardMode));
+#else
+            _sensor = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings(address, 100000));
+#endif
 
+#if (NANOFRAMEWORK_1_0)
+            _dataReady = new GpioController().OpenPin(dataReadyPin, PinMode.Input);
+#else
             _dataReady = GpioController.GetDefault().OpenPin(dataReadyPin);
             _dataReady.SetDriveMode(GpioPinDriveMode.Input);
+#endif
 
             // Get Calibration Data
             if (!GetCalibrationData()) throw new DeviceInitialisationException("BMP085 GetCalibrationData failed.");
@@ -358,7 +371,11 @@ namespace MBN.Modules
             {
                 WriteByte(0xF4, (Byte)(((Byte)_overSamplingSetting << 6) + 0x34));
 
+#if (NANOFRAMEWORK_1_0)
+                while (_dataReady.Read() == PinValue.Low) {Thread.Sleep(10);}
+#else
                 while (_dataReady.Read() == GpioPinValue.Low) {Thread.Sleep(10);}
+#endif
 
                 Byte[] upData = ReadRegister(0xF6, 3);
 
@@ -381,7 +398,11 @@ namespace MBN.Modules
             {
                 WriteByte(0xF4, 0x2E);
 
+#if (NANOFRAMEWORK_1_0)
+                while (_dataReady.Read() == PinValue.Low) {Thread.Sleep(10);}
+#else
                 while (_dataReady.Read() == GpioPinValue.Low) {Thread.Sleep(10);}
+#endif
 
                 Byte[] data = ReadRegister(0xF6, 2);
 

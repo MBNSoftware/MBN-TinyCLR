@@ -1,0 +1,83 @@
+# Copyright (c) NetworkFusion, .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+
+# This workflow will build the solution and release a nuget.
+
+name: Build nanoFramework lib and release nuget (if appropriate)
+
+on: [push, pull_request]
+
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  build-drivers:
+    name: Build nanoFramework/MBN Click Drivers
+    timeout-minutes: 15
+    runs-on: windows-latest
+    env:
+      solution: 'nanoFramework.ClickDrivers.sln'
+      buildPlatform: 'Any CPU'
+      buildConfiguration: 'Release'
+      classLibName: 'nanoFramework.MikroClick.Drivers'
+      nugetPackageName: 'nanoFramework.ClickDrivers'
+      GITHUB_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Install build components for nanoFramework
+        uses: nanoframework/nanobuild@v1
+
+      - name: Setup MSBuild Path
+        uses: microsoft/setup-msbuild@v1.1
+        with:
+          msbuild-architecture: x64
+
+      - name: Install NuGet client
+        uses: nuget/setup-nuget@v1
+        # with:
+        #   nuget-api-key: ${{ secrets.NUGET_API_KEY }}
+
+      - name: Restore nuget packages
+        run: nuget restore ${{ env.solution }} -ConfigFile NuGet.Config
+
+      - name: Build App
+        run: msbuild ${{ env.solution }} /p:Configuration=${{ env.buildConfiguration }}
+
+      # - name: Run unit tests
+      #   run: ./nanoFramework.nanoCLR.exe -load ...nanoFramework.UnitTestLauncher.pe --load ..mscorlib.pe --load ...nanoFramework.TestFramework.pe --load ...NFUnitTest.pe
+
+      - name: Set nuget package version using nerdbank
+        uses: dotnet/nbgv@v0.4.0
+        with:
+          setAllVars: true
+
+      - name: Pack nugets #Should use https://github.com/dotnet/Nerdbank.GitVersioning/blob/master/doc/public_vs_stable.md for better management of naming!
+        run: nuget pack ${{ env.nugetPackageName }}.nuspec -Version ${{ env.NBGV_NuGetPackageVersion }} -Symbols -SymbolPackageFormat snupkg -properties Configuration=${{ env.buildConfiguration }}
+
+      - name: Upload nuget Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: click-drivers
+          path: |
+            ${{ github.workspace }}\**\*.nupkg
+            ${{ github.workspace }}\**\*.snupkg
+          # ${{ github.workspace }}\**\*.dll
+          # ${{ github.workspace }}\**\*.pe
+
+      # Publish nuget tasks
+      - name: Publish nuget to Github
+        if: startsWith(github.ref, 'refs/heads/develop-nanoframework')
+        run: |
+          nuget sources Add -Name github -Source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json -UserName ${{ github.repository_owner }} -Password ${{ secrets.NUGET_PUBLISH }}
+          nuget push "**/${{ env.nugetPackageName }}*.nupkg" -Source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json -SkipDuplicate -ApiKey ${{ secrets.NUGET_PUBLISH }}
+
+      - name: Publish nuget to nuget.org
+        if: startsWith(github.ref, 'refs/heads/release')
+        run: |
+          nuget push "**/${{ env.nugetPackageName }}*.nupkg" -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_ORG_API_KEY}} -SkipDuplicate

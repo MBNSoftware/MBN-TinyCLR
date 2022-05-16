@@ -10,8 +10,11 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
-
+#if (NANOFRAMEWORK_1_0)
+using System.Device.Gpio;
+#else
 using GHIElectronics.TinyCLR.Devices.Gpio;
+#endif
 
 using System;
 
@@ -61,8 +64,12 @@ namespace MBN.Modules
         /// <param name="socket">The <see cref="Hardware.Socket"/> that the AltitudeClick is inserted into.</param>
         public BiHallClick(Hardware.Socket socket)
         {
+#if (NANOFRAMEWORK_1_0)
+            _interrupt = new GpioController().OpenPin(socket.Int, PinMode.InputPullDown);
+#else
             _interrupt = GpioController.GetDefault().OpenPin(socket.Int);
             _interrupt.SetDriveMode(GpioPinDriveMode.InputPullDown);
+#endif
             _interrupt.ValueChanged += Interrupt_ValueChanged;
         }
 
@@ -76,11 +83,19 @@ namespace MBN.Modules
 
         #region Private Methods/Internal Interrupt Routines
 
+#if (NANOFRAMEWORK_1_0)
+        private void Interrupt_ValueChanged(object sender, PinValueChangedEventArgs e)
+        {
+            SwitchStateChangedEventHandler tempEvent = SwitchStateChanged;
+            tempEvent?.Invoke(this, e.ChangeType ==  PinEventTypes.Rising);
+        }
+#else
         private void Interrupt_ValueChanged(GpioPin sender, GpioPinValueChangedEventArgs e)
         {
             SwitchStateChangedEventHandler tempEvent = SwitchStateChanged;
             tempEvent?.Invoke(this, e.Edge == GpioPinEdge.RisingEdge);
         }
+#endif
 
         #endregion
 
@@ -95,7 +110,11 @@ namespace MBN.Modules
         /// Debug.WriteLine($"Switch state - {_biHall.SwitchState}");
         /// </code>
         /// </example>
+#if (NANOFRAMEWORK_1_0)
+        public Boolean SwitchState => _interrupt.Read() == PinValue.High;
+#else
         public Boolean SwitchState => _interrupt.Read() == GpioPinValue.High;
+#endif
 
         #endregion
 

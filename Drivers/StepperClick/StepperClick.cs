@@ -11,7 +11,12 @@
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.Gpio;
+#else
 using GHIElectronics.TinyCLR.Devices.Gpio;
+#endif
+
 using System;
 using System.Threading;
 
@@ -123,6 +128,33 @@ namespace MBN.Modules
         /// <param name="socket">The socket on which the Stepper Click board is plugged on MikroBus.Net</param>
         public StepperClick(Hardware.Socket socket)
         {
+#if (NANOFRAMEWORK_1_0)
+            var gpio = new GpioController();
+            _ms1 = gpio.OpenPin(socket.AnPin);
+            _ms2 = gpio.OpenPin(socket.Rst);
+            _dir = gpio.OpenPin(socket.Cs);
+            _enable = gpio.OpenPin(socket.Int);
+            _step = gpio.OpenPin(socket.PwmPin);
+
+            _ms1.SetPinMode(PinMode.Output);
+            _ms2.SetPinMode(PinMode.Output);
+            _dir.SetPinMode(PinMode.Output);
+            _enable.SetPinMode(PinMode.Output);
+            _step.SetPinMode(PinMode.Output);
+
+            // Default step size to full step
+            _ms1.Write(PinValue.Low);
+            _ms2.Write(PinValue.Low);
+
+            //Enable outputs
+            _enable.Write(PinValue.Low);
+
+            // Default direction is Clockwise
+            _dir.Write(PinValue.Low);
+
+            // Ensure no step at startup
+            _step.Write(PinValue.Low);
+#else
             _ms1 = GpioController.GetDefault().OpenPin(socket.AnPin);
             _ms2 = GpioController.GetDefault().OpenPin(socket.Rst);
             _dir = GpioController.GetDefault().OpenPin(socket.Cs);
@@ -147,10 +179,11 @@ namespace MBN.Modules
 
             // Ensure no step at startup
             _step.Write(GpioPinValue.Low);
+#endif
         }
-        #endregion
+#endregion
 
-        #region Public methods
+#region Public methods
         /// <summary>
         /// Move the motor by one step.
         /// </summary>
@@ -164,9 +197,15 @@ namespace MBN.Modules
         /// </example>
         public void Step()
         {
+#if (NANOFRAMEWORK_1_0)
+            _step.Write(PinValue.High);
+            Thread.Sleep(1);
+            _step.Write(PinValue.Low);
+#else
             _step.Write(GpioPinValue.High);
             Thread.Sleep(1);
             _step.Write(GpioPinValue.Low);
+#endif
             Thread.Sleep(1);
         }
 
@@ -189,7 +228,11 @@ namespace MBN.Modules
             get { return _enabled; }
             set
             {
+#if (NANOFRAMEWORK_1_0)
+                _enable.Write(value ? PinValue.Low : PinValue.High);
+#else
                 _enable.Write(value ? GpioPinValue.Low : GpioPinValue.High);
+#endif
                 _enabled = value;
             }
         }
@@ -213,7 +256,11 @@ namespace MBN.Modules
             get { return _direction; }
             set
             {
+#if (NANOFRAMEWORK_1_0)
+                _dir.Write(value == Directions.CounterClockwise ? PinValue.High : PinValue.Low);
+#else
                 _dir.Write(value == Directions.CounterClockwise ? GpioPinValue.High : GpioPinValue.Low);
+#endif
                 _direction = value;
             }
         }
@@ -239,6 +286,28 @@ namespace MBN.Modules
             {
                 switch (value)
                 {
+#if (NANOFRAMEWORK_1_0)
+                    case StepSizes.Full:
+                        _ms1.Write(PinValue.Low);
+                        _ms2.Write(PinValue.Low);
+                        _stepSize = StepSizes.Full;
+                        break;
+                    case StepSizes.Half:
+                        _ms1.Write(PinValue.High);
+                        _ms2.Write(PinValue.Low);
+                        _stepSize = StepSizes.Half;
+                        break;
+                    case StepSizes.Fourth:
+                        _ms1.Write(PinValue.Low);
+                        _ms2.Write(PinValue.High);
+                        _stepSize = StepSizes.Fourth;
+                        break;
+                    case StepSizes.Eighth:
+                        _ms1.Write(PinValue.High);
+                        _ms2.Write(PinValue.High);
+                        _stepSize = StepSizes.Eighth;
+                        break;
+#else
                     case StepSizes.Full:
                         _ms1.Write(GpioPinValue.Low);
                         _ms2.Write(GpioPinValue.Low);
@@ -259,9 +328,10 @@ namespace MBN.Modules
                         _ms2.Write(GpioPinValue.High);
                         _stepSize = StepSizes.Eighth;
                         break;
+#endif
                 }
             }
         }
-        #endregion
+#endregion
     }
 }

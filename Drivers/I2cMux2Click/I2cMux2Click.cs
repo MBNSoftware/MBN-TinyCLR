@@ -10,8 +10,14 @@
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.Gpio;
+using System.Device.I2c;
+#else
 using GHIElectronics.TinyCLR.Devices.Gpio;
 using GHIElectronics.TinyCLR.Devices.I2c;
+#endif
+
 using System;
 using System.Threading;
 
@@ -77,11 +83,25 @@ namespace MBN.Modules
         /// <param name="socket">The socket on which the module is plugged</param>
         /// <param name="address">The I2C address of the module</param>
         /// <param name="busSpeed">The bus speed.</param>
+#if (NANOFRAMEWORK_1_0)
+        public I2cMux2Click(Hardware.Socket socket, byte address = 0xE0 >> 1, I2cBusSpeed busSpeed = I2cBusSpeed.StandardMode)
+#else
         public I2cMux2Click(Hardware.Socket socket, Byte address = 0xE0 >> 1, UInt32 busSpeed = 100000)
+#endif
         {
             _socket = socket;
-            _mux2 = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings(address, busSpeed));
+#if (NANOFRAMEWORK_1_0)
+            _mux2 = I2cDevice.Create(new I2cConnectionSettings(socket.I2cBus, address, busSpeed));
+            _rst = new GpioController().OpenPin(socket.Rst);
+            _rst.SetPinMode(PinMode.Output);
+            _rst.Write(PinValue.Low);
+            Thread.Sleep(100);
+            _rst.Write(PinValue.High);
 
+            _int = new GpioController().OpenPin(socket.Int);
+            _int.SetPinMode(PinMode.InputPullUp);
+#else
+            _mux2 = I2cController.FromName(socket.I2cBus).GetDevice(new I2cConnectionSettings(address, busSpeed));
             _rst = GpioController.GetDefault().OpenPin(socket.Rst);
             _rst.SetDriveMode(GpioPinDriveMode.Output);
             _rst.Write(GpioPinValue.Low);
@@ -90,6 +110,7 @@ namespace MBN.Modules
 
             _int = GpioController.GetDefault().OpenPin(socket.Int);
             _int.SetDriveMode(GpioPinDriveMode.InputPullUp);
+#endif
             EnableInterrupts();
         }
 
@@ -117,9 +138,15 @@ namespace MBN.Modules
             }
         }
 
+#if (NANOFRAMEWORK_1_0)
+        private void Int_ValueChanged(object sender, PinValueChangedEventArgs e)
+        {
+            if (e.ChangeType == PinEventTypes.Falling)
+#else
         private void Int_ValueChanged(GpioPin sender, GpioPinValueChangedEventArgs e)
         {
             if (e.Edge == GpioPinEdge.FallingEdge)
+#endif
             {
                 lock (_socket.LockI2c)
                 {

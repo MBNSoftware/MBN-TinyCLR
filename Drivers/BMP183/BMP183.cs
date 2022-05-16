@@ -10,7 +10,12 @@
  * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
+#if (NANOFRAMEWORK_1_0)
+using System.Device.Spi;
+#else
+using GHIElectronics.TinyCLR.Devices.Gpio;
 using GHIElectronics.TinyCLR.Devices.Spi;
+#endif
 
 using System;
 using System.Diagnostics;
@@ -71,13 +76,21 @@ namespace MBN.Modules
         {
             _socket = socket;
             // Initialize SPI
-            _sensor = SpiController.FromName(socket.SpiBus).GetDevice(new SpiConnectionSettings()
+#if (NANOFRAMEWORK_1_0)
+            _sensor = SpiDevice.Create(new SpiConnectionSettings(socket.SpiBus, socket.Cs)
             {
-                ChipSelectType = SpiChipSelectType.Gpio,
-                ChipSelectLine = GHIElectronics.TinyCLR.Devices.Gpio.GpioController.GetDefault().OpenPin(socket.Cs),
                 Mode = SpiMode.Mode3,
                 ClockFrequency = 10000000
             });
+#else
+            _sensor = SpiController.FromName(socket.SpiBus).GetDevice(new SpiConnectionSettings()
+            {
+                ChipSelectType = SpiChipSelectType.Gpio,
+                ChipSelectLine = GpioController.GetDefault().OpenPin(socket.Cs),
+                Mode = SpiMode.Mode3,
+                ClockFrequency = 10000000
+            });
+#endif
 
             Thread.Sleep(10); // Per data sheet, must wait 10ms before first communication after power up.
 
@@ -200,7 +213,13 @@ namespace MBN.Modules
 
             lock (_socket.LockSpi)
             {
+#if (NANOFRAMEWORK_1_0)
+                _sensor.WriteByte(register);
+                _sensor.Read(result);
+                //_sensor.TransferSequential(new[] { register }, result); //TODO: this might need reverting if the lib ever supports it!
+#else
                 _sensor.TransferSequential(new[] { register }, result);
+#endif
             }
 
             return result;
